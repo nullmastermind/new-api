@@ -88,6 +88,9 @@ export const useLogsData = () => {
   // Form state
   const [formApi, setFormApi] = useState(null);
   let now = new Date();
+  // Get end of today (23:59:59)
+  let endOfToday = new Date();
+  endOfToday.setHours(23, 59, 59, 999);
   const formInitValues = {
     username: '',
     token_name: '',
@@ -96,7 +99,7 @@ export const useLogsData = () => {
     group: '',
     dateRange: [
       timestamp2string(getTodayStartTimestamp()),
-      timestamp2string(now.getTime() / 1000 + 3600),
+      timestamp2string(Math.floor(endOfToday.getTime() / 1000)),
     ],
     logType: '0',
   };
@@ -203,7 +206,10 @@ export const useLogsData = () => {
     const formValues = formApi ? formApi.getValues() : {};
 
     let start_timestamp = timestamp2string(getTodayStartTimestamp());
-    let end_timestamp = timestamp2string(now.getTime() / 1000 + 3600);
+    // Get end of today (23:59:59) as default
+    let endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+    let end_timestamp = timestamp2string(Math.floor(endOfDay.getTime() / 1000));
 
     if (
       formValues.dateRange &&
