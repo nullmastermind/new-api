@@ -326,7 +326,7 @@ export const getLogsColumns = ({
               }}
             >
               {' '}
-              {t(text)}{' '}
+              {text}{' '}
             </Tag>
           </div>
         ) : (
