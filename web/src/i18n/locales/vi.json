@@ -2736,6 +2736,39 @@
     "默认用户消息": "Xin chào",
     "默认助手消息": "Xin chào! Tôi có thể giúp gì cho bạn?",
     "可选，用于复现结果": "Tùy chọn, để tái tạo kết quả",
-    "随机种子 (留空为随机)": "Hạt giống ngẫu nhiên (để trống cho ngẫu nhiên)"
+    "随机种子 (留空为随机)": "Hạt giống ngẫu nhiên (để trống cho ngẫu nhiên)",
+    "playground": {
+      "contentTruncated": "Nội dung được cắt ngắn để cải thiện hiệu suất",
+      "userUploadedImage": "Hình ảnh do người dùng tải lên",
+      "imageLoadFailed": "Lỗi tải hình ảnh",
+      "roleSwitchedToSystem": "Đã chuyển sang vai trò System",
+      "roleSwitchedToAssistant": "Đã chuyển sang vai trò Assistant",
+      "messageEdited": "Tin nhắn đã được chỉnh sửa",
+      "regenerateConfirmContent": "Phát hiện thấy phản hồi AI sau tin nhắn này. Bạn có muốn xóa các phản hồi tiếp theo và tái tạo không?",
+      "regenerate": "Tái tạo",
+      "saveOnly": "Chỉ lưu",
+      "messageUpdated": "Tin nhắn đã được cập nhật",
+      "defaultMessageUser": "Xin chào",
+      "defaultMessageAssistant": "Xin chào! Rất vui được gặp bạn. Tôi có thể giúp gì cho bạn?",
+      "error": {
+        "copyFailed": "Sao chép thất bại",
+        "copyHttpsRequired": "Vui lòng sử dụng HTTPS để bật chức năng sao chép",
+        "browserNotSupported": "Trình duyệt không hỗ trợ API clipboard",
+        "jsonParseError": "Lỗi phân tích JSON",
+        "apiRequestError": "Lỗi yêu cầu API",
+        "networkError": "Lỗi mạng",
+        "cannotReadErrorResponse": "Không thể đọc phần thân phản hồi lỗi",
+        "requestErrorWithMessage": "Lỗi yêu cầu: ",
+        "parseError": "Lỗi phân tích",
+        "parseResponseError": "Lỗi khi phân tích dữ liệu phản hồi",
+        "requestError": "Lỗi yêu cầu",
+        "httpStatusError": "Lỗi trạng thái HTTP",
+        "connectionClosed": "Kết nối đã bị đóng",
+        "streamStartFailed": "Lỗi khởi động luồng",
+        "connectionError": "Lỗi khi thiết lập kết nối",
+        "loadModelsFailed": "Lỗi tải mô hình",
+        "loadGroupsFailed": "Lỗi tải nhóm"
+      }
+    }
   }
 }

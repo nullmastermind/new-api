@@ -2226,6 +2226,39 @@
     "默认助手消息": "Bonjour ! Comment puis-je vous aider aujourd'hui ?",
     "可选，用于复现结果": "Optionnel, pour des résultats reproductibles",
     "随机种子 (留空为随机)": "Graine aléatoire (laisser vide pour aléatoire)",
-    "默认补全倍率": "Taux de complétion par défaut"
+    "默认补全倍率": "Taux de complétion par défaut",
+    "playground": {
+      "contentTruncated": "Contenu tronqué pour les performances",
+      "userUploadedImage": "Image téléchargée par l'utilisateur",
+      "imageLoadFailed": "Échec du chargement de l'image",
+      "roleSwitchedToSystem": "Changé en rôle System",
+      "roleSwitchedToAssistant": "Changé en rôle Assistant",
+      "messageEdited": "Message modifié",
+      "regenerateConfirmContent": "Une réponse IA a été détectée après ce message. Voulez-vous supprimer les réponses suivantes et régénérer ?",
+      "regenerate": "Régénérer",
+      "saveOnly": "Enregistrer uniquement",
+      "messageUpdated": "Message mis à jour",
+      "defaultMessageUser": "Bonjour",
+      "defaultMessageAssistant": "Bonjour ! Ravi de vous rencontrer. Comment puis-je vous aider ?",
+      "error": {
+        "copyFailed": "Échec de la copie",
+        "copyHttpsRequired": "Veuillez utiliser HTTPS pour activer la fonction de copie",
+        "browserNotSupported": "Le navigateur ne prend pas en charge l'API du presse-papiers",
+        "jsonParseError": "Erreur d'analyse JSON",
+        "apiRequestError": "Erreur de requête API",
+        "networkError": "Erreur réseau",
+        "cannotReadErrorResponse": "Impossible de lire le corps de la réponse d'erreur",
+        "requestErrorWithMessage": "Erreur de requête : ",
+        "parseError": "Erreur d'analyse",
+        "parseResponseError": "Erreur lors de l'analyse des données de réponse",
+        "requestError": "Erreur de requête",
+        "httpStatusError": "Erreur de statut HTTP",
+        "connectionClosed": "Connexion fermée",
+        "streamStartFailed": "Échec du démarrage du flux",
+        "connectionError": "Erreur lors de l'établissement de la connexion",
+        "loadModelsFailed": "Échec du chargement des modèles",
+        "loadGroupsFailed": "Échec du chargement des groupes"
+      }
+    }
   }
 }

@@ -50,7 +50,7 @@ export const useDataLoader = (
         showError(t(message));
       }
     } catch (error) {
-      showError(t('加载模型失败'));
+      showError(t('playground.error.loadModelsFailed'));
     }
   }, [inputs.model, handleInputChange, setModels, t]);
 
@@ -76,7 +76,7 @@ export const useDataLoader = (
         showError(t(message));
       }
     } catch (error) {
-      showError(t('加载分组失败'));
+      showError(t('playground.error.loadGroupsFailed'));
     }
   }, [userState, inputs.group, handleInputChange, setGroups, t]);
 

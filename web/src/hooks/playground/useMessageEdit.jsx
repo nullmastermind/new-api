@@ -83,10 +83,10 @@ export const useMessageEdit = (
 
         if (hasSubsequentAssistantReply) {
           Modal.confirm({
-            title: t('消息已编辑'),
-            content: t('检测到该消息后有AI回复，是否删除后续回复并重新生成？'),
-            okText: t('重新生成'),
-            cancelText: t('仅保存'),
+            title: t('playground.messageEdited'),
+            content: t('playground.regenerateConfirmContent'),
+            okText: t('playground.regenerate'),
+            cancelText: t('playground.saveOnly'),
             onOk: () => {
               const messagesUntilUser = updatedMessages.slice(
                 0,
@@ -128,7 +128,7 @@ export const useMessageEdit = (
     setEditingMessageId(null);
     editingMessageRef.current = null;
     setEditValue('');
-    Toast.success({ content: t('消息已更新'), duration: 2 });
+    Toast.success({ content: t('playground.messageUpdated'), duration: 2 });
   }, [
     editingMessageId,
     editValue,

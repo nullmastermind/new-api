@@ -2125,6 +2125,39 @@
     "默认用户消息": "こんにちは",
     "默认助手消息": "こんにちは！何かお手伝いできることはありますか？",
     "可选，用于复现结果": "オプション、結果の再現用",
-    "随机种子 (留空为随机)": "ランダムシード（空欄でランダム）"
+    "随机种子 (留空为随机)": "ランダムシード（空欄でランダム）",
+    "playground": {
+      "contentTruncated": "パフォーマンスのためコンテンツが切り詰められました",
+      "userUploadedImage": "ユーザーがアップロードした画像",
+      "imageLoadFailed": "画像の読み込みに失敗しました",
+      "roleSwitchedToSystem": "Systemロールに切り替えられました",
+      "roleSwitchedToAssistant": "Assistantロールに切り替えられました",
+      "messageEdited": "メッセージが編集されました",
+      "regenerateConfirmContent": "このメッセージの後にAIの返信が検出されました。後続の返信を削除して再生成しますか？",
+      "regenerate": "再生成",
+      "saveOnly": "保存のみ",
+      "messageUpdated": "メッセージが更新されました",
+      "defaultMessageUser": "こんにちは",
+      "defaultMessageAssistant": "こんにちは！お会いできて嬉しいです。何かお手伝いできることはありますか？",
+      "error": {
+        "copyFailed": "コピーに失敗しました",
+        "copyHttpsRequired": "コピー機能を有効にするには、HTTPSをご利用ください",
+        "browserNotSupported": "ブラウザがクリップボードAPIに対応していません",
+        "jsonParseError": "JSON解析エラー",
+        "apiRequestError": "APIリクエストエラー",
+        "networkError": "ネットワークエラー",
+        "cannotReadErrorResponse": "エラーレスポンスボディを読み取れません",
+        "requestErrorWithMessage": "リクエストエラー: ",
+        "parseError": "解析エラー",
+        "parseResponseError": "レスポンスデータの解析中にエラーが発生しました",
+        "requestError": "リクエストエラー",
+        "httpStatusError": "HTTPステータスエラー",
+        "connectionClosed": "接続が切断されました",
+        "streamStartFailed": "ストリームの開始に失敗しました",
+        "connectionError": "接続時にエラーが発生しました",
+        "loadModelsFailed": "モデルの読み込みに失敗しました",
+        "loadGroupsFailed": "グループの読み込みに失敗しました"
+      }
+    }
   }
 }

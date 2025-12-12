@@ -2236,6 +2236,39 @@
     "默认用户消息": "Здравствуйте",
     "默认助手消息": "Здравствуйте! Чем я могу вам помочь?",
     "可选，用于复现结果": "Необязательно, для воспроизводимых результатов",
-    "随机种子 (留空为随机)": "Случайное зерно (оставьте пустым для случайного)"
+    "随机种子 (留空为随机)": "Случайное зерно (оставьте пустым для случайного)",
+    "playground": {
+      "contentTruncated": "Содержимое сокращено для производительности",
+      "userUploadedImage": "Изображение загружено пользователем",
+      "imageLoadFailed": "Ошибка загрузки изображения",
+      "roleSwitchedToSystem": "Переключено на роль System",
+      "roleSwitchedToAssistant": "Переключено на роль Assistant",
+      "messageEdited": "Сообщение отредактировано",
+      "regenerateConfirmContent": "После этого сообщения обнаружен ответ ИИ. Удалить последующие ответы и перегенерировать?",
+      "regenerate": "Перегенерировать",
+      "saveOnly": "Только сохранить",
+      "messageUpdated": "Сообщение обновлено",
+      "defaultMessageUser": "Здравствуйте",
+      "defaultMessageAssistant": "Здравствуйте! Рад вас видеть. Чем могу помочь?",
+      "error": {
+        "copyFailed": "Ошибка копирования",
+        "copyHttpsRequired": "Используйте HTTPS для включения функции копирования",
+        "browserNotSupported": "Браузер не поддерживает API буфера обмена",
+        "jsonParseError": "Ошибка разбора JSON",
+        "apiRequestError": "Ошибка API-запроса",
+        "networkError": "Сетевая ошибка",
+        "cannotReadErrorResponse": "Невозможно прочитать тело ответа об ошибке",
+        "requestErrorWithMessage": "Ошибка запроса: ",
+        "parseError": "Ошибка разбора",
+        "parseResponseError": "Ошибка при разборе данных ответа",
+        "requestError": "Ошибка запроса",
+        "httpStatusError": "Ошибка HTTP-статуса",
+        "connectionClosed": "Соединение закрыто",
+        "streamStartFailed": "Ошибка запуска потока",
+        "connectionError": "Ошибка при установке соединения",
+        "loadModelsFailed": "Ошибка загрузки моделей",
+        "loadGroupsFailed": "Ошибка загрузки групп"
+      }
+    }
   }
 }

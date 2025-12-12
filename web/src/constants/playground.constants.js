@@ -36,13 +36,13 @@ export const getDefaultMessages = (t) => [
     role: MESSAGE_ROLES.USER,
     id: '2',
     createAt: 1715676751919,
-    content: t('默认用户消息'),
+    content: t('playground.defaultMessageUser'),
   },
   {
     role: MESSAGE_ROLES.ASSISTANT,
     id: '3',
     createAt: 1715676751919,
-    content: t('默认助手消息'),
+    content: t('playground.defaultMessageAssistant'),
     reasoningContent: '',
     isReasoningExpanded: false,
   },
@@ -112,16 +112,16 @@ export const DEFAULT_CONFIG = {
 // ========== 正则表达式 ==========
 export const THINK_TAG_REGEX = /<think>([\s\S]*?)<\/think>/g;
 
-// ========== 错误消息 ==========
+// ========== 错误消息 (使用翻译 key) ==========
 export const ERROR_MESSAGES = {
-  NO_TEXT_CONTENT: '此消息没有可复制的文本内容',
-  INVALID_MESSAGE_TYPE: '无法复制此类型的消息内容',
-  COPY_FAILED: '复制失败，请手动选择文本复制',
-  COPY_HTTPS_REQUIRED: '复制功能需要 HTTPS 环境，请手动复制',
-  BROWSER_NOT_SUPPORTED: '浏览器不支持复制功能，请手动复制',
-  JSON_PARSE_ERROR: '自定义请求体格式错误，请检查JSON格式',
-  API_REQUEST_ERROR: '请求发生错误',
-  NETWORK_ERROR: '网络连接失败或服务器无响应',
+  NO_TEXT_CONTENT: 'playground.error.noTextContent',
+  INVALID_MESSAGE_TYPE: 'playground.error.invalidMessageType',
+  COPY_FAILED: 'playground.error.copyFailed',
+  COPY_HTTPS_REQUIRED: 'playground.error.copyHttpsRequired',
+  BROWSER_NOT_SUPPORTED: 'playground.error.browserNotSupported',
+  JSON_PARSE_ERROR: 'playground.error.jsonParseError',
+  API_REQUEST_ERROR: 'playground.error.apiRequestError',
+  NETWORK_ERROR: 'playground.error.networkError',
 };
 
 // ========== 存储键名 ==========

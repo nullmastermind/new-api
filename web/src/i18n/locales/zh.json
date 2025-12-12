@@ -2203,6 +2203,39 @@
     "默认用户消息": "你好",
     "默认助手消息": "你好！有什么我可以帮助你的吗？",
     "可选，用于复现结果": "可选，用于复现结果",
-    "随机种子 (留空为随机)": "随机种子 (留空为随机)"
+    "随机种子 (留空为随机)": "随机种子 (留空为随机)",
+    "playground": {
+      "contentTruncated": "内容被截断以提升性能",
+      "userUploadedImage": "用户上传的图片",
+      "imageLoadFailed": "图片加载失败",
+      "roleSwitchedToSystem": "已切换为System角色",
+      "roleSwitchedToAssistant": "已切换为Assistant角色",
+      "messageEdited": "消息已编辑",
+      "regenerateConfirmContent": "检测到该消息后有AI回复，是否删除后续回复并重新生成？",
+      "regenerate": "重新生成",
+      "saveOnly": "仅保存",
+      "messageUpdated": "消息已更新",
+      "defaultMessageUser": "你好",
+      "defaultMessageAssistant": "你好！很高兴见到你。有什么我可以帮助你的吗？",
+      "error": {
+        "copyFailed": "复制失败",
+        "copyHttpsRequired": "请使用HTTPS来启用复制功能",
+        "browserNotSupported": "浏览器不支持剪贴板API",
+        "jsonParseError": "JSON解析错误",
+        "apiRequestError": "API请求错误",
+        "networkError": "网络错误",
+        "cannotReadErrorResponse": "无法读取错误响应体",
+        "requestErrorWithMessage": "请求发生错误: ",
+        "parseError": "解析错误",
+        "parseResponseError": "解析响应数据时发生错误",
+        "requestError": "请求发生错误",
+        "httpStatusError": "HTTP状态错误",
+        "connectionClosed": "连接已断开",
+        "streamStartFailed": "Stream启动失败",
+        "connectionError": "建立连接时发生错误",
+        "loadModelsFailed": "加载模型失败",
+        "loadGroupsFailed": "加载分组失败"
+      }
+    }
   }
 }
