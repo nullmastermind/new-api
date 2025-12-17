@@ -2178,6 +2178,10 @@
     "默认折叠侧边栏": "Default collapse sidebar",
     "默认测试模型": "Default Test Model",
     "默认补全倍率": "Default completion ratio",
+    "跨分组重试": "Cross-group retry",
+    "跨分组": "Cross-group",
+    "开启后，当前分组渠道失败时会按顺序尝试下一个分组的渠道": "After enabling, when the current group channel fails, it will try the next group's channel in order"
+    "默认补全倍率": "Default completion ratio",
     "请先在设置中启用图片功能": "Please enable image feature in settings first",
     "图片已添加": "Image added",
     "无法添加图片": "Cannot add image",
