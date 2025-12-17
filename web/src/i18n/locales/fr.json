@@ -2229,8 +2229,7 @@
     "默认补全倍率": "Taux de complétion par défaut",
     "跨分组重试": "Nouvelle tentative inter-groupes",
     "跨分组": "Inter-groupes",
-    "开启后，当前分组渠道失败时会按顺序尝试下一个分组的渠道": "Après activation, lorsque le canal du groupe actuel échoue, il essaiera le canal du groupe suivant dans l'ordre"
-    "默认补全倍率": "Taux de complétion par défaut",
+    "开启后，当前分组渠道失败时会按顺序尝试下一个分组的渠道": "Après activation, lorsque le canal du groupe actuel échoue, il essaiera le canal du groupe suivant dans l'ordre",
     "playground": {
       "contentTruncated": "Contenu tronqué pour les performances",
       "userUploadedImage": "Image téléchargée par l'utilisateur",

@@ -2739,8 +2739,7 @@
     "随机种子 (留空为随机)": "Hạt giống ngẫu nhiên (để trống cho ngẫu nhiên)",
     "跨分组重试": "Thử lại giữa các nhóm",
     "跨分组": "Giữa các nhóm",
-    "开启后，当前分组渠道失败时会按顺序尝试下一个分组的渠道": "Sau khi bật, khi kênh nhóm hiện tại thất bại, nó sẽ thử kênh của nhóm tiếp theo theo thứ tự"
-    "随机种子 (留空为随机)": "Hạt giống ngẫu nhiên (để trống cho ngẫu nhiên)",
+    "开启后，当前分组渠道失败时会按顺序尝试下一个分组的渠道": "Sau khi bật, khi kênh nhóm hiện tại thất bại, nó sẽ thử kênh của nhóm tiếp theo theo thứ tự",
     "playground": {
       "contentTruncated": "Nội dung được cắt ngắn để cải thiện hiệu suất",
       "userUploadedImage": "Hình ảnh do người dùng tải lên",
