@@ -86,7 +86,7 @@ export default function ModelSettingsVisualEditor(props) {
 
       setModels(modelData);
     } catch (error) {
-      console.error('JSON解析错误:', error);
+      console.error(t('JSON解析错误:'), error);
     }
   }, [props.options]);
 
@@ -155,7 +155,7 @@ export default function ModelSettingsVisualEditor(props) {
         if (results.includes(undefined)) return;
       } else if (requestQueue.length > 1) {
         if (results.includes(undefined)) {
-          return showError('部分保存失败，请重试');
+          return showError(t('部分保存失败，请重试'));
         }
       }
 
@@ -166,11 +166,11 @@ export default function ModelSettingsVisualEditor(props) {
         }
       }
 
-      showSuccess('保存成功');
+      showSuccess(t('保存成功'));
       props.refresh();
     } catch (error) {
-      console.error('保存失败:', error);
-      showError('保存失败，请重试');
+      console.error(t('保存失败:'), error);
+      showError(t('保存失败，请重试'));
     } finally {
       setLoading(false);
     }
@@ -254,7 +254,7 @@ export default function ModelSettingsVisualEditor(props) {
 
   const updateModel = (name, field, value) => {
     if (isNaN(value)) {
-      showError('请输入数字');
+      showError(t('请输入数字'));
       return;
     }
     setModels((prev) =>
@@ -282,7 +282,7 @@ export default function ModelSettingsVisualEditor(props) {
     completionTokenPrice,
   ) => {
     if (!modelTokenPrice || modelTokenPrice === '0') {
-      showError('模型价格不能为0');
+      showError(t('模型价格不能为0'));
       return '';
     }
     return completionTokenPrice / modelTokenPrice;

@@ -63,7 +63,9 @@ export default function SettingsMonitoring(props) {
         parsedAutoDisableStatusCodes.invalidTokens.length > 0
           ? `: ${parsedAutoDisableStatusCodes.invalidTokens.join(', ')}`
           : '';
-      return showError(`${t('自动禁用状态码格式不正确')}${details}`);
+      return showError(
+        t('自动禁用状态码格式不正确{{details}}', { details }),
+      );
     }
     if (!parsedAutoRetryStatusCodes.ok) {
       const details =
@@ -71,7 +73,9 @@ export default function SettingsMonitoring(props) {
         parsedAutoRetryStatusCodes.invalidTokens.length > 0
           ? `: ${parsedAutoRetryStatusCodes.invalidTokens.join(', ')}`
           : '';
-      return showError(`${t('自动重试状态码格式不正确')}${details}`);
+      return showError(
+        t('自动重试状态码格式不正确{{details}}', { details }),
+      );
     }
     const requestQueue = updateArray.map((item) => {
       let value = '';

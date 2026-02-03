@@ -105,7 +105,7 @@ const Home = () => {
       }
     } else {
       showError(message);
-      setHomePageContent('加载首页内容失败...');
+      setHomePageContent(t('加载首页内容失败...'));
     }
     setHomePageContentLoaded(true);
   };
@@ -129,7 +129,7 @@ const Home = () => {
             setNoticeVisible(true);
           }
         } catch (error) {
-          console.error('获取公告失败:', error);
+          console.error(t('获取公告失败:'), error);
         }
       }
     };

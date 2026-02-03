@@ -188,7 +188,11 @@ export default function SettingsPaymentGateway(props) {
           </Text>
           <Banner
             type='info'
-            description={`Webhook 填：${props.options.ServerAddress ? removeTrailingSlash(props.options.ServerAddress) : t('网站地址')}/api/stripe/webhook`}
+            description={t('Webhook 填：{{url}}/api/stripe/webhook', {
+              url: props.options.ServerAddress
+                ? removeTrailingSlash(props.options.ServerAddress)
+                : t('网站地址'),
+            })}
           />
           <Banner
             type='warning'

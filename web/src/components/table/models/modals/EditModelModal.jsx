@@ -52,13 +52,6 @@ const ENDPOINT_TEMPLATE = {
   'image-generation': { path: '/v1/images/generations', method: 'POST' },
 };
 
-const nameRuleOptions = [
-  { label: '精确名称匹配', value: 0 },
-  { label: '前缀名称匹配', value: 1 },
-  { label: '包含名称匹配', value: 2 },
-  { label: '后缀名称匹配', value: 3 },
-];
-
 const EditModelModal = (props) => {
   const { t } = useTranslation();
   const [loading, setLoading] = useState(false);
@@ -66,6 +59,13 @@ const EditModelModal = (props) => {
   const formApiRef = useRef(null);
   const isEdit = props.editingModel && props.editingModel.id !== undefined;
   const placement = useMemo(() => (isEdit ? 'right' : 'left'), [isEdit]);
+
+  const nameRuleOptions = [
+    { label: t('精确名称匹配'), value: 0 },
+    { label: t('前缀名称匹配'), value: 1 },
+    { label: t('包含名称匹配'), value: 2 },
+    { label: t('后缀名称匹配'), value: 3 },
+  ];
 
   // 供应商列表
   const [vendors, setVendors] = useState([]);

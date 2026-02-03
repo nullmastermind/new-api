@@ -24,6 +24,9 @@ go test -v -run TestValidateRedirectURL ./common/...
 
 # Run tests in a package
 go test -v ./relay/common/...
+
+# Run i18n tests (check for Chinese strings in user-facing messages)
+go test -v ./common/i18n_test.go
 ```
 
 ### Frontend (React + Vite)
@@ -49,6 +52,7 @@ bun run eslint:fix    # ESLint fix
 # i18n
 bun run i18n:extract  # Extract translation keys
 bun run i18n:sync     # Sync translations
+bun run test:i18n     # Run i18n tests (check for hardcoded Chinese strings)
 ```
 
 ### Docker

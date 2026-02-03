@@ -24,6 +24,7 @@ import {
   isValidMessage,
 } from './utils';
 import axios from 'axios';
+import i18n from '../i18n/i18n';
 import { MESSAGE_ROLES } from '../constants/playground.constants';
 
 export let API = axios.create({
@@ -197,7 +198,7 @@ export const processGroupsData = (data, userGroup) => {
   if (groupOptions.length === 0) {
     groupOptions = [
       {
-        label: '用户分组',
+        label: i18n.t('用户分组'),
         value: '',
         ratio: 1,
       },

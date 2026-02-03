@@ -303,16 +303,26 @@ export default function UpstreamRatioSync(props) {
       if (localCat && localCat !== newCat) {
         const currentDesc =
           localCat === 'price'
-            ? `${t('固定价格')} : ${currentRatios.ModelPrice[model]}`
-            : `${t('模型倍率')} : ${currentRatios.ModelRatio[model] ?? '-'}\n${t('补全倍率')} : ${currentRatios.CompletionRatio[model] ?? '-'}`;
+            ? t('固定价格 : {{price}}', {
+                price: currentRatios.ModelPrice[model],
+              })
+            : t('模型倍率 : {{modelRatio}}\n补全倍率 : {{completionRatio}}', {
+                modelRatio: currentRatios.ModelRatio[model] ?? '-',
+                completionRatio: currentRatios.CompletionRatio[model] ?? '-',
+              });
 
         let newDesc = '';
         if (newCat === 'price') {
-          newDesc = `${t('固定价格')} : ${ratios['model_price']}`;
+          newDesc = t('固定价格 : {{price}}', {
+            price: ratios['model_price'],
+          });
         } else {
           const newModelRatio = ratios['model_ratio'] ?? '-';
           const newCompRatio = ratios['completion_ratio'] ?? '-';
-          newDesc = `${t('模型倍率')} : ${newModelRatio}\n${t('补全倍率')} : ${newCompRatio}`;
+          newDesc = t('模型倍率 : {{modelRatio}}\n补全倍率 : {{completionRatio}}', {
+            modelRatio: newModelRatio,
+            completionRatio: newCompRatio,
+          });
         }
 
         const channels = Object.entries(ratios)

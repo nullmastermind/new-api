@@ -91,7 +91,7 @@ const SettingsAPIInfo = ({ options, refresh }) => {
     });
     const { success, message } = res.data;
     if (success) {
-      showSuccess('API信息已更新');
+      showSuccess(t('API信息已更新'));
       if (refresh) refresh();
     } else {
       showError(message);
@@ -105,8 +105,8 @@ const SettingsAPIInfo = ({ options, refresh }) => {
       await updateOption('console_setting.api_info', apiInfoJson);
       setHasChanges(false);
     } catch (error) {
-      console.error('API信息更新失败', error);
-      showError('API信息更新失败');
+      console.error(t('API信息更新失败'), error);
+      showError(t('API信息更新失败'));
     } finally {
       setLoading(false);
     }
@@ -144,7 +144,7 @@ const SettingsAPIInfo = ({ options, refresh }) => {
       const newList = apiInfoList.filter((api) => api.id !== deletingApi.id);
       setApiInfoList(newList);
       setHasChanges(true);
-      showSuccess('API信息已删除，请及时点击“保存设置”进行保存');
+      showSuccess(t('API信息已删除，请及时点击"保存设置"进行保存'));
     }
     setShowDeleteModal(false);
     setDeletingApi(null);
@@ -152,7 +152,7 @@ const SettingsAPIInfo = ({ options, refresh }) => {
 
   const handleSaveApi = async () => {
     if (!apiForm.url || !apiForm.route || !apiForm.description) {
-      showError('请填写完整的API信息');
+      showError(t('请填写完整的API信息'));
       return;
     }
 
@@ -178,11 +178,11 @@ const SettingsAPIInfo = ({ options, refresh }) => {
       setShowApiModal(false);
       showSuccess(
         editingApi
-          ? 'API信息已更新，请及时点击“保存设置”进行保存'
-          : 'API信息已添加，请及时点击“保存设置”进行保存',
+          ? t('API信息已更新，请及时点击"保存设置"进行保存')
+          : t('API信息已添加，请及时点击"保存设置"进行保存'),
       );
     } catch (error) {
-      showError('操作失败: ' + error.message);
+      showError(t('操作失败: {{message}}', { message: error.message }));
     } finally {
       setModalLoading(false);
     }
@@ -198,7 +198,7 @@ const SettingsAPIInfo = ({ options, refresh }) => {
       const parsed = JSON.parse(apiInfoStr);
       setApiInfoList(Array.isArray(parsed) ? parsed : []);
     } catch (error) {
-      console.error('解析API信息失败:', error);
+      console.error(t('解析API信息失败:'), error);
       setApiInfoList([]);
     }
   };
@@ -299,7 +299,7 @@ const SettingsAPIInfo = ({ options, refresh }) => {
 
   const handleBatchDelete = () => {
     if (selectedRowKeys.length === 0) {
-      showError('请先选择要删除的API信息');
+      showError(t('请先选择要删除的API信息'));
       return;
     }
 
@@ -310,7 +310,9 @@ const SettingsAPIInfo = ({ options, refresh }) => {
     setSelectedRowKeys([]);
     setHasChanges(true);
     showSuccess(
-      `已删除 ${selectedRowKeys.length} 个API信息，请及时点击“保存设置”进行保存`,
+      t('已删除 {{count}} 个API信息，请及时点击"保存设置"进行保存', {
+        count: selectedRowKeys.length,
+      }),
     );
   };
 
@@ -385,10 +387,10 @@ const SettingsAPIInfo = ({ options, refresh }) => {
       setSelectedRowKeys(selectedRowKeys);
     },
     onSelect: (record, selected, selectedRows) => {
-      console.log(`选择行: ${selected}`, record);
+      console.log(t('选择行: {{selected}}', { selected }), record);
     },
     onSelectAll: (selected, selectedRows) => {
-      console.log(`全选: ${selected}`, selectedRows);
+      console.log(t('全选: {{selected}}', { selected }), selectedRows);
     },
     getCheckboxProps: (record) => ({
       disabled: false,

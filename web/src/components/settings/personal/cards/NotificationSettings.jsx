@@ -526,7 +526,7 @@ const NotificationSettings = ({
                           <CodeViewer
                             content={{
                               type: 'quota_exceed',
-                              title: '额度预警通知',
+                              title: t('额度预警通知'),
                               content:
                                 '您的额度即将用尽，当前剩余额度为 {{value}}',
                               values: ['$0.99'],
