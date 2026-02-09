@@ -42,6 +42,8 @@ import {
   TASK_ACTION_REMIX_GENERATE,
 } from '../../../constants/common.constant';
 import { CHANNEL_OPTIONS } from '../../../constants/channel.constants';
+import { stringToColor } from '../../../helpers/render';
+import { Avatar, Space } from '@douyinfe/semi-ui';
 
 const colors = [
   'amber',
@@ -289,6 +291,39 @@ export const getTaskLogsColumns = ({
       },
     },
     {
+      key: COLUMN_KEYS.USERNAME,
+      title: t('用户'),
+      dataIndex: 'username',
+      render: (text, record, index) => {
+        if (!isAdminUser) {
+          return <></>;
+        }
+        const displayName = record.display_name;
+        const label = displayName || text || t('未知');
+        const avatarText =
+          typeof displayName === 'string' && displayName.length > 0
+            ? displayName[0]
+            : typeof text === 'string' && text.length > 0
+              ? text[0]
+              : '?';
+
+        return (
+          <Space>
+            <Avatar
+              size='extra-small'
+              color={stringToColor(label)}
+              style={{ cursor: 'default' }}
+            >
+              {avatarText}
+            </Avatar>
+            <Typography.Text ellipsis={{ showTooltip: true }}>
+              {label}
+            </Typography.Text>
+          </Space>
+        );
+      },
+    },
+    {
       key: COLUMN_KEYS.PLATFORM,
       title: t('平台'),
       dataIndex: 'platform',
@@ -371,13 +406,12 @@ export const getTaskLogsColumns = ({
         const isSuccess = record.status === 'SUCCESS';
         const isUrl = typeof text === 'string' && /^https?:\/\//.test(text);
         if (isSuccess && isVideoTask && isUrl) {
-          const videoUrl = `/v1/videos/${record.task_id}/content`;
           return (
             <a
               href='#'
               onClick={(e) => {
                 e.preventDefault();
-                openVideoModal(videoUrl);
+                openVideoModal(text);
               }}
             >
               {t('点击预览视频')}

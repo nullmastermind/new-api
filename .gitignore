@@ -16,8 +16,10 @@ new-api
 tiktoken_cache
 .eslintcache
 .gocache
+.gomodcache/
 .cache
 web/bun.lock
+plans
 
 electron/node_modules
 electron/dist
@@ -26,3 +28,5 @@ auggie_shell.ps1
 auggie_shell.sh
 auggie_shell_user_request.txt
 auggie_shell_conversation.txt
+.gocache-temp
+.gopath
