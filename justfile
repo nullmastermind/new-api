@@ -12,4 +12,4 @@ docker-push: docker-build
 docker-build-push: docker-push
 
 pull:
-    auggie command git-pull "pull & merge remore 'fork', brain 'main'" --print --compact
+    auggie command git-pull "Pull and merge the remote 'fork', branch 'main', then run `just docker-build` to ensure the image is built successfully." --print --compact
