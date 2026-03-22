@@ -24,9 +24,9 @@ import { useTranslation } from 'react-i18next';
 import { copy } from '../../helpers';
 
 const PERFORMANCE_CONFIG = {
-  MAX_DISPLAY_LENGTH: 50000, // Max display characters
-  PREVIEW_LENGTH: 5000, // Preview length
-  VERY_LARGE_MULTIPLIER: 2, // Very large content multiplier
+  MAX_DISPLAY_LENGTH: 50000, // 最大显示字符数
+  PREVIEW_LENGTH: 5000, // 预览长度
+  VERY_LARGE_MULTIPLIER: 2, // 超大内容倍数
 };
 
 const codeThemeStyles = {
@@ -195,17 +195,15 @@ const CodeViewer = ({ content, title, language = 'json' }) => {
     return { length, isLarge, isVeryLarge };
   }, [formattedContent.length]);
 
-  const truncationMessage = t('playground.contentTruncated');
-
   const displayContent = useMemo(() => {
     if (!contentMetrics.isLarge || isExpanded) {
       return formattedContent;
     }
     return (
       formattedContent.substring(0, PERFORMANCE_CONFIG.PREVIEW_LENGTH) +
-      '\n\n// ... ' + truncationMessage + ' ...'
+      '\n\n// ... 内容被截断以提升性能 ...'
     );
-  }, [formattedContent, contentMetrics.isLarge, isExpanded, truncationMessage]);
+  }, [formattedContent, contentMetrics.isLarge, isExpanded]);
 
   const highlightedContent = useMemo(() => {
     if (contentMetrics.isVeryLarge && !isExpanded) {

@@ -199,7 +199,7 @@ export const useApiRequest = (
           try {
             errorBody = await response.text();
           } catch (e) {
-            errorBody = t('playground.error.cannotReadErrorResponse');
+            errorBody = '无法读取错误响应体';
           }
 
           const errorInfo = handleApiError(
@@ -276,7 +276,7 @@ export const useApiRequest = (
 
             newMessages[newMessages.length - 1] = {
               ...lastMessage,
-              content: t('playground.error.requestErrorWithMessage') + error.message,
+              content: t('请求发生错误: ') + error.message,
               status: MESSAGE_STATUS.ERROR,
               ...autoCollapseState,
             };
@@ -360,7 +360,7 @@ export const useApiRequest = (
           }
         } catch (error) {
           console.error('Failed to parse SSE message:', error);
-          const errorInfo = t('playground.error.parseError') + `: ${error.message}`;
+          const errorInfo = `解析错误: ${error.message}`;
 
           setDebugData((prev) => ({
             ...prev,
@@ -370,7 +370,7 @@ export const useApiRequest = (
           }));
           setActiveDebugTab(DEBUG_TABS.RESPONSE);
 
-          streamMessageUpdate(t('playground.error.parseResponseError'), 'content');
+          streamMessageUpdate(t('解析响应数据时发生错误'), 'content');
           completeMessage(MESSAGE_STATUS.ERROR);
         }
       });
@@ -379,7 +379,7 @@ export const useApiRequest = (
         // 只有在流没有正常完成且连接状态异常时才处理错误
         if (!isStreamComplete && source.readyState !== 2) {
           console.error('SSE Error:', e);
-          const errorMessage = e.data || t('playground.error.requestError');
+          const errorMessage = e.data || t('请求发生错误');
 
           const errorInfo = handleApiError(new Error(errorMessage));
           errorInfo.readyState = source.readyState;
@@ -408,7 +408,7 @@ export const useApiRequest = (
           source.status !== 200 &&
           !isStreamComplete
         ) {
-          const errorInfo = handleApiError(new Error(t('playground.error.httpStatusError')));
+          const errorInfo = handleApiError(new Error('HTTP状态错误'));
           errorInfo.status = source.status;
           errorInfo.readyState = source.readyState;
 
@@ -422,7 +422,7 @@ export const useApiRequest = (
           setActiveDebugTab(DEBUG_TABS.RESPONSE);
 
           source.close();
-          streamMessageUpdate(t('playground.error.connectionClosed'), 'content');
+          streamMessageUpdate(t('连接已断开'), 'content');
           completeMessage(MESSAGE_STATUS.ERROR);
         }
       });
@@ -435,11 +435,11 @@ export const useApiRequest = (
 
         setDebugData((prev) => ({
           ...prev,
-          response: t('playground.error.streamStartFailed') + ':\n' + JSON.stringify(errorInfo, null, 2),
+          response: 'Stream启动失败:\n' + JSON.stringify(errorInfo, null, 2),
         }));
         setActiveDebugTab(DEBUG_TABS.RESPONSE);
 
-        streamMessageUpdate(t('playground.error.connectionError'), 'content');
+        streamMessageUpdate(t('建立连接时发生错误'), 'content');
         completeMessage(MESSAGE_STATUS.ERROR);
       }
     },

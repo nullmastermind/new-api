@@ -39,6 +39,7 @@ import {
 } from '../../helpers';
 import { ITEMS_PER_PAGE } from '../../constants';
 import { useTableCompactMode } from '../common/useTableCompactMode';
+import ParamOverrideEntry from '../../components/table/usage-logs/components/ParamOverrideEntry';
 
 export const useLogsData = () => {
   const { t } = useTranslation();
@@ -91,9 +92,6 @@ export const useLogsData = () => {
   // Form state
   const [formApi, setFormApi] = useState(null);
   let now = new Date();
-  // Get end of today (23:59:59)
-  let endOfToday = new Date();
-  endOfToday.setHours(23, 59, 59, 999);
   const formInitValues = {
     username: '',
     token_name: '',
@@ -103,7 +101,7 @@ export const useLogsData = () => {
     request_id: '',
     dateRange: [
       timestamp2string(getTodayStartTimestamp()),
-      timestamp2string(Math.floor(endOfToday.getTime() / 1000)),
+      timestamp2string(now.getTime() / 1000 + 3600),
     ],
     logType: '0',
   };
@@ -184,6 +182,8 @@ export const useLogsData = () => {
   ] = useState(false);
   const [channelAffinityUsageCacheTarget, setChannelAffinityUsageCacheTarget] =
     useState(null);
+  const [showParamOverrideModal, setShowParamOverrideModal] = useState(false);
+  const [paramOverrideTarget, setParamOverrideTarget] = useState(null);
 
   // Initialize default column visibility
   const initDefaultColumns = () => {
@@ -235,10 +235,7 @@ export const useLogsData = () => {
     const formValues = formApi ? formApi.getValues() : {};
 
     let start_timestamp = timestamp2string(getTodayStartTimestamp());
-    // Get end of today (23:59:59) as default
-    let endOfDay = new Date();
-    endOfDay.setHours(23, 59, 59, 999);
-    let end_timestamp = timestamp2string(Math.floor(endOfDay.getTime() / 1000));
+    let end_timestamp = timestamp2string(now.getTime() / 1000 + 3600);
 
     if (
       formValues.dateRange &&
@@ -349,6 +346,20 @@ export const useLogsData = () => {
       key_fp: a.key_fp || '',
     });
     setShowChannelAffinityUsageCacheModal(true);
+  };
+
+  const openParamOverrideModal = (log, other) => {
+    const lines = Array.isArray(other?.po) ? other.po.filter(Boolean) : [];
+    if (lines.length === 0) {
+      return;
+    }
+    setParamOverrideTarget({
+      lines,
+      modelName: log?.model_name || '',
+      requestId: log?.request_id || '',
+      requestPath: other?.request_path || '',
+    });
+    setShowParamOverrideModal(true);
   };
 
   // Format logs data
@@ -590,6 +601,21 @@ export const useLogsData = () => {
           value: other.request_path,
         });
       }
+      if (Array.isArray(other?.po) && other.po.length > 0) {
+        expandDataLocal.push({
+          key: t('参数覆盖'),
+          value: (
+            <ParamOverrideEntry
+              count={other.po.length}
+              t={t}
+              onOpen={(event) => {
+                event.stopPropagation();
+                openParamOverrideModal(logs[i], other);
+              }}
+            />
+          ),
+        });
+      }
       if (other?.billing_source === 'subscription') {
         const planId = other?.subscription_plan_id;
         const planTitle = other?.subscription_plan_title || '';
@@ -739,7 +765,7 @@ export const useLogsData = () => {
   const copyText = async (e, text) => {
     e.stopPropagation();
     if (await copy(text)) {
-      showSuccess(t('已复制：') + text);
+      showSuccess('已复制：' + text);
     } else {
       Modal.error({ title: t('无法复制到剪贴板，请手动复制'), content: text });
     }
@@ -817,6 +843,9 @@ export const useLogsData = () => {
     setShowChannelAffinityUsageCacheModal,
     channelAffinityUsageCacheTarget,
     openChannelAffinityUsageCacheModal,
+    showParamOverrideModal,
+    setShowParamOverrideModal,
+    paramOverrideTarget,
 
     // Functions
     loadLogs,
@@ -828,6 +857,7 @@ export const useLogsData = () => {
     setLogsFormat,
     hasExpandableRows,
     setLogType,
+    openParamOverrideModal,
 
     // Translation
     t,

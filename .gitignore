@@ -26,9 +26,10 @@ plans
 electron/node_modules
 electron/dist
 data/
+.gomodcache/
+.gocache-temp
+.gopath
 auggie_shell.ps1
 auggie_shell.sh
 auggie_shell_user_request.txt
 auggie_shell_conversation.txt
-.gocache-temp
-.gopath

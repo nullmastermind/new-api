@@ -8,8 +8,8 @@ import (
 )
 
 var userUsableGroups = map[string]string{
-	"default": "Default Group",
-	"vip":     "VIP Group",
+	"default": "默认分组",
+	"vip":     "vip分组",
 }
 var userUsableGroupsMutex sync.RWMutex
 

@@ -31,8 +31,7 @@ import { useTranslation } from 'react-i18next';
 import Text from '@douyinfe/semi-ui/lib/es/typography/text';
 
 const GEMINI_SETTING_EXAMPLE = {
-  default: 'OFF',
-  HARM_CATEGORY_CIVIC_INTEGRITY: 'BLOCK_NONE',
+  default: 'OFF'
 };
 
 const GEMINI_VERSION_EXAMPLE = {
@@ -241,7 +240,11 @@ export default function SettingGeminiModel(props) {
             <Row>
               <Col span={16}>
                 <Text>
-                  {t('Gemini思考适配说明')}
+                  {t(
+                    '和Claude不同，默认情况下Gemini的思考模型会自动决定要不要思考，就算不开启适配模型也可以正常使用，' +
+                      '如果您需要计费，推荐设置无后缀模型价格按思考价格设置。' +
+                      '支持使用 gemini-2.5-pro-preview-06-05-thinking-128 格式来精确传递思考预算。',
+                  )}
                 </Text>
               </Col>
             </Row>
