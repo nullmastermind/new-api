@@ -20,9 +20,12 @@ go build -ldflags "-s -w -X 'github.com/QuantumNous/new-api/common.Version=$(cat
 ./new-api --port 3000 --log-dir ./logs
 ```
 
-### Frontend (React + Vite)
+### Frontend (React + Bun)
+
+The `web/` tree now contains two theme bundles — `web/default/` (primary, React 19 + Rsbuild + Base UI + Tailwind) and `web/classic/` (legacy, React 18 + Vite + Semi Design). Run commands inside whichever theme you are building.
+
 ```bash
-cd web
+cd web/default        # or: cd web/classic
 
 # Install dependencies (uses Bun)
 bun install
@@ -31,7 +34,7 @@ bun install
 bun run dev
 
 # Production build
-DISABLE_ESLINT_PLUGIN='true' VITE_REACT_APP_VERSION=$(cat ../VERSION) bun run build
+DISABLE_ESLINT_PLUGIN='true' VITE_REACT_APP_VERSION=$(cat ../../VERSION) bun run build
 
 # Linting
 bun run lint          # Check with Prettier
@@ -72,12 +75,26 @@ docker-compose up -d  # Start with PostgreSQL + Redis
 - **`constant/`**: Constants and environment variable definitions
 - **`dto/`**: Data transfer objects for API requests/responses
 
-### Frontend Structure (React + Semi UI)
-- **`web/src/pages/`**: Page components (Channel, Token, Log, Playground, etc.)
-- **`web/src/components/`**: Reusable components
-- **`web/src/context/`**: React contexts (User, Status, Theme)
-- **`web/src/i18n/`**: Internationalization (zh, en, fr, ru, ja, vi)
-- **`web/src/helpers/`**: API utilities and helpers
+### Frontend Structure (Two Themes)
+
+The frontend lives under `web/` and ships as two independent theme bundles:
+
+**`web/default/`** — Primary theme (React 19, Rsbuild, Base UI, Tailwind, TanStack Router)
+- **`src/routes/`**: Route components (file-based routing)
+- **`src/features/`**: Feature-scoped modules
+- **`src/components/`**: Reusable components
+- **`src/context/`**: React contexts
+- **`src/hooks/`**: Custom hooks
+- **`src/stores/`**: State stores
+- **`src/i18n/locales/`**: Internationalization (zh, en, fr, ru, ja, vi)
+- **`src/lib/`** & **`src/config/`**: API utilities and configuration
+
+**`web/classic/`** — Legacy theme (React 18, Vite, Semi Design)
+- **`src/pages/`**: Page components (Channel, Token, Log, Playground, etc.)
+- **`src/components/`**: Reusable components
+- **`src/context/`** / **`src/contexts/`**: React contexts (User, Status, Theme)
+- **`src/i18n/locales/`**: Internationalization (zh, en, fr, ru, ja, vi)
+- **`src/helpers/`** / **`src/services/`**: API utilities and helpers
 
 ### Relay Adaptor Pattern
 Each AI provider has an adaptor implementing the `channel.Adaptor` interface:
@@ -172,15 +189,16 @@ Key provider types in `relay/constant/api_type.go`:
 
 ## License Headers
 
-All source files require AGPL-3.0 license headers. Frontend uses ESLint plugin `eslint-plugin-header` to enforce this. The header format is defined in `web/.eslintrc.cjs`.
+All source files require AGPL-3.0 license headers. Frontend uses ESLint plugin `eslint-plugin-header` to enforce this. The header format is defined in each theme's ESLint config (`web/default/eslint.config.js`, `web/classic/.eslintrc.cjs`).
 
 ## i18n
 
+- Library: `i18next` + `react-i18next` + `i18next-browser-languagedetector`
 - Fallback language: Chinese (`zh`)
 - Supported: zh, en, fr, ru, ja, vi
-- Translation files: `web/src/i18n/locales/*.json`
+- Translation files (per theme): `web/default/src/i18n/locales/*.json` and `web/classic/src/i18n/locales/*.json`
 - Use `t('key')` from `useTranslation()` hook
-- Extract new keys: `bun run i18n:extract`
+- Extract new keys: `bun run i18n:extract` (run inside the relevant theme directory)
 
 ## Rules
 
@@ -224,7 +242,7 @@ All database code MUST be fully compatible with all three databases simultaneous
 
 ### Rule 3: Frontend — Prefer Bun
 
-Use `bun` as the preferred package manager and script runner for the frontend (`web/` directory):
+Use `bun` as the preferred package manager and script runner for the frontend (`web/default/` directory):
 - `bun install` for dependency installation
 - `bun run dev` for development server
 - `bun run build` for production build
@@ -261,3 +279,7 @@ For request structs that are parsed from client JSON and then re-marshaled to up
   - field absent in client JSON => `nil` => omitted on marshal;
   - field explicitly set to zero/false => non-`nil` pointer => must still be sent upstream.
 - Avoid using non-pointer scalars with `omitempty` for optional request parameters, because zero values (`0`, `0.0`, `false`) will be silently dropped during marshal.
+
+### Rule 7: Billing Expression System — Read `pkg/billingexpr/expr.md`
+
+When working on tiered/dynamic billing (expression-based pricing), you MUST read `pkg/billingexpr/expr.md` first. It documents the design philosophy, expression language (variables, functions, examples), full system architecture (editor → storage → pre-consume → settlement → log display), token normalization rules (`p`/`c` auto-exclusion), quota conversion, and expression versioning. All code changes to the billing expression system must follow the patterns described in that document.
