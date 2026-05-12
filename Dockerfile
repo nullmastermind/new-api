@@ -3,7 +3,13 @@ FROM oven/bun:1@sha256:0733e50325078969732ebe3b15ce4c4be5082f18c4ac1a0f0ca4839c2
 WORKDIR /build
 COPY web/default/package.json .
 COPY web/default/bun.lock .
-RUN bun install
+RUN for i in 1 2 3; do \
+      bun install --network-concurrency=4 && break; \
+      if [ $i -eq 3 ]; then echo "bun install failed after 3 attempts" >&2; exit 1; fi; \
+      echo "bun install attempt $i failed, retrying..."; \
+      rm -rf node_modules; bun pm cache rm 2>/dev/null || true; \
+      sleep 5; \
+    done
 COPY ./web/default .
 COPY ./VERSION .
 RUN DISABLE_ESLINT_PLUGIN='true' VITE_REACT_APP_VERSION=$(cat VERSION) bun run build
@@ -13,7 +19,13 @@ FROM oven/bun:1@sha256:0733e50325078969732ebe3b15ce4c4be5082f18c4ac1a0f0ca4839c2
 WORKDIR /build
 COPY web/classic/package.json .
 COPY web/classic/bun.lock .
-RUN bun install
+RUN for i in 1 2 3; do \
+      bun install --network-concurrency=4 && break; \
+      if [ $i -eq 3 ]; then echo "bun install failed after 3 attempts" >&2; exit 1; fi; \
+      echo "bun install attempt $i failed, retrying..."; \
+      rm -rf node_modules; bun pm cache rm 2>/dev/null || true; \
+      sleep 5; \
+    done
 COPY ./web/classic .
 COPY ./VERSION .
 RUN VITE_REACT_APP_VERSION=$(cat VERSION) bun run build
