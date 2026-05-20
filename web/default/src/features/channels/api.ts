@@ -176,12 +176,25 @@ export async function batchSetChannelTag(
 
 /**
  * Test channel connectivity
+ *
+ * `byok_test_key` is sent as the `X-BYOK-Test-Key` request header (not a
+ * query parameter) so the upstream secret never lands in URL access logs.
  */
 export async function testChannel(
   id: number,
-  params?: { model?: string; endpoint_type?: string; stream?: boolean }
+  params?: {
+    model?: string
+    endpoint_type?: string
+    stream?: boolean
+    byok_test_key?: string
+  }
 ): Promise<ChannelTestResponse> {
-  const res = await api.get(`/api/channel/test/${id}`, { params })
+  const { byok_test_key, ...queryParams } = params ?? {}
+  const config: AxiosRequestConfig = { params: queryParams }
+  if (byok_test_key) {
+    config.headers = { 'X-BYOK-Test-Key': byok_test_key }
+  }
+  const res = await api.get(`/api/channel/test/${id}`, config)
   return res.data
 }
 

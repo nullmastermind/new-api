@@ -4481,6 +4481,12 @@
     "Zero retention": "データ保持なし",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V 4",
-    "Zoom": "ズーム"
+    "Zoom": "ズーム",
+    "Copy BYOK sentinel": "BYOK プレースホルダーをコピー",
+    "Paste $FORWARD_KEY as the channel key to enable BYOK (Bring Your Own Key) forwarding. Clients then send sk-<token>:<upstream-key> as the API key.": "$FORWARD_KEY をチャネルのキーとして貼り付けると、BYOK（持ち込みキー）転送が有効になります。クライアントは sk-<トークン>:<アップストリームキー> を API キーとして送信します。",
+    "Best with simple-key providers (OpenAI, Anthropic, Gemini, Azure). Composite-key providers (AWS, Vertex JSON, Xunfei, Volcengine TTS) require the client to send the full composite string after the colon.": "単純キー方式のプロバイダー（OpenAI、Anthropic、Gemini、Azure）に最適です。複合キー方式のプロバイダー（AWS、Vertex JSON、Xunfei、Volcengine TTS）では、クライアントがコロンの後ろに完全な複合文字列を送信する必要があります。",
+    "Upstream test key (BYOK)": "アップストリームテストキー（BYOK）",
+    "Required for BYOK channels — paste a real upstream key for this test only": "BYOK チャネルでは必須 — このテスト専用に実際のアップストリームキーを貼り付けてください",
+    "This channel is in BYOK forwarding mode. The test key is used only for this test and is not persisted.": "このチャネルは BYOK 転送モードです。テストキーは今回のテストのみに使用され、保存されません。"
   }
 }

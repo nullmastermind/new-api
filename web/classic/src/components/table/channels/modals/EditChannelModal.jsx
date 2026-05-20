@@ -160,6 +160,56 @@ function type2secretPrompt(type) {
   }
 }
 
+// BYOKKeyHint renders a copy-able $FORWARD_KEY badge under the Key field
+// together with a short explanation of BYOK forwarding semantics. The text
+// is translated through `t()` so the six supported locales pick up the
+// translations.
+const BYOKKeyHint = () => {
+  const { t } = useTranslation();
+  const handleCopy = async () => {
+    try {
+      await copy('$FORWARD_KEY');
+      showSuccess(t('已复制 $FORWARD_KEY'));
+    } catch (e) {
+      showError(t('复制失败'));
+    }
+  };
+  return (
+    <div className='byok-hint' style={{ marginTop: 6 }}>
+      <Banner
+        type='info'
+        bordered
+        closeIcon={null}
+        description={
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Tag color='blue' size='small'>$FORWARD_KEY</Tag>
+              <Button
+                size='small'
+                theme='borderless'
+                icon={<IconCopy />}
+                onClick={handleCopy}
+              >
+                {t('复制 BYOK 占位符')}
+              </Button>
+            </div>
+            <Text type='tertiary' size='small'>
+              {t(
+                '将 $FORWARD_KEY 粘贴到渠道密钥字段以启用 BYOK（自带密钥）转发。客户端调用时使用 sk-<令牌>:<上游密钥> 作为 API Key。',
+              )}
+            </Text>
+            <Text type='tertiary' size='small'>
+              {t(
+                '推荐用于简单密钥渠道（OpenAI、Anthropic、Gemini、Azure）。AWS、Vertex JSON、讯飞、火山引擎 TTS 等复合密钥渠道需在冒号后传入完整复合字符串。',
+              )}
+            </Text>
+          </div>
+        }
+      />
+    </div>
+  );
+};
+
 const EditChannelModal = (props) => {
   const { t } = useTranslation();
   const channelId = props.editingChannel.id;
@@ -3079,27 +3129,30 @@ const EditChannelModal = (props) => {
                               handleInputChange('key', value)
                             }
                             extraText={
-                              <div className='flex items-center gap-2'>
-                                {isEdit &&
-                                  isMultiKeyChannel &&
-                                  keyMode === 'append' && (
-                                    <Text type='warning' size='small'>
-                                      {t(
-                                        '追加模式：新密钥将添加到现有密钥列表的末尾',
-                                      )}
-                                    </Text>
+                              <div className='flex flex-col gap-2'>
+                                <div className='flex items-center gap-2'>
+                                  {isEdit &&
+                                    isMultiKeyChannel &&
+                                    keyMode === 'append' && (
+                                      <Text type='warning' size='small'>
+                                        {t(
+                                          '追加模式：新密钥将添加到现有密钥列表的末尾',
+                                        )}
+                                      </Text>
+                                    )}
+                                  {isEdit && (
+                                    <Button
+                                      size='small'
+                                      type='primary'
+                                      theme='outline'
+                                      onClick={handleShow2FAModal}
+                                    >
+                                      {t('查看密钥')}
+                                    </Button>
                                   )}
-                                {isEdit && (
-                                  <Button
-                                    size='small'
-                                    type='primary'
-                                    theme='outline'
-                                    onClick={handleShow2FAModal}
-                                  >
-                                    {t('查看密钥')}
-                                  </Button>
-                                )}
-                                {batchExtra}
+                                  {batchExtra}
+                                </div>
+                                <BYOKKeyHint />
                               </div>
                             }
                             showClear

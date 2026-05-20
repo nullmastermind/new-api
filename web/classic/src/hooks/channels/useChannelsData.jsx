@@ -864,6 +864,7 @@ export const useChannelsData = () => {
     model,
     endpointType = '',
     stream = false,
+    byokTestKey = '',
   ) => {
     const testKey = `${record.id}-${model}`;
 
@@ -883,7 +884,13 @@ export const useChannelsData = () => {
       if (stream) {
         url += `&stream=true`;
       }
-      const res = await API.get(url);
+      // BYOK test key is sent as a request header (not a URL query
+      // parameter) so the upstream secret does not leak into URL access
+      // logs, reverse-proxy logs, or browser history.
+      const requestConfig = byokTestKey
+        ? { headers: { 'X-BYOK-Test-Key': byokTestKey } }
+        : undefined;
+      const res = await API.get(url, requestConfig);
 
       // 检查是否在请求期间被停止
       if (shouldStopBatchTestingRef.current && isBatchTesting) {
@@ -955,7 +962,7 @@ export const useChannelsData = () => {
   };
 
   // 批量测试单个渠道的所有模型，参考旧版实现
-  const batchTestModels = async () => {
+  const batchTestModels = async (byokTestKey = '') => {
     if (!currentTestChannel || !currentTestChannel.models) {
       showError(t('渠道模型信息不完整'));
       return;
@@ -1018,6 +1025,7 @@ export const useChannelsData = () => {
             model,
             selectedEndpointType,
             isStreamTest,
+            byokTestKey,
           ),
         );
         const batchResults = await Promise.allSettled(batchPromises);

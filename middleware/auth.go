@@ -33,6 +33,48 @@ func validUserInfo(username string, role int) bool {
 	return true
 }
 
+// splitBYOKKey splits the value of an auth carrier (after `Bearer `/`bearer `
+// prefix has been stripped, but before `sk-` strip and `-` split) on the FIRST
+// `:` character. The left half is the new-api token portion (fed unchanged
+// into the existing parser); the right half is the client-supplied upstream
+// key for Bring-Your-Own-Key (BYOK) channels, preserved verbatim (including
+// any further `:` characters in the upstream key).
+//
+// If the raw value contains no `:`, upstreamPart is empty and behavior is
+// byte-identical to the previous implementation.
+func splitBYOKKey(raw string) (newApiPart, upstreamPart string) {
+	idx := strings.IndexByte(raw, ':')
+	if idx < 0 {
+		return raw, ""
+	}
+	return raw[:idx], raw[idx+1:]
+}
+
+// parseAuthCarrierValue normalizes a raw carrier value (after the
+// `Bearer `/`bearer ` prefix has been stripped) into the shared
+// token-parts shape used by every TokenAuth path. It splits on the
+// BYOK `:` separator, strips the `sk-` prefix, and tokenizes on `-`.
+//
+// Returned values:
+//   - key: the first `-`-separated segment of the new-api token portion
+//     (post `sk-` strip). Empty string if input was empty.
+//   - parts: the full slice of `-`-separated segments (parts[0] == key).
+//   - upstreamKey: the right half of the BYOK split (verbatim, may be empty).
+//
+// This is the single source of truth for carrier parsing — both the
+// `Authorization` and `mj-api-secret` branches in extractTokenAuthCarrier
+// call it so they cannot drift, and TokenAuthReadOnly reuses the same
+// split semantics on its (read-only) path.
+func parseAuthCarrierValue(raw string) (key string, parts []string, upstreamKey string) {
+	key, upstreamKey = splitBYOKKey(raw)
+	key = strings.TrimPrefix(key, "sk-")
+	parts = strings.Split(key, "-")
+	if len(parts) > 0 {
+		key = parts[0]
+	}
+	return
+}
+
 func authHelper(c *gin.Context, minRole int) {
 	session := sessions.Default(c)
 	username := session.Get("username")
@@ -225,6 +267,13 @@ func TokenAuthReadOnly() func(c *gin.Context) {
 		if strings.HasPrefix(key, "Bearer ") || strings.HasPrefix(key, "bearer ") {
 			key = strings.TrimSpace(key[7:])
 		}
+		// Discard the BYOK upstream half on the read-only path — these
+		// endpoints don't dispatch upstream so the right half of
+		// `sk-<token>:<upstream-key>` is irrelevant. Without this split a
+		// BYOK-formatted carrier would yield a malformed token (e.g.
+		// `abc123:sk`) and fail lookup. Note: we deliberately do NOT write
+		// ContextKeyBYOKUpstreamKey here — that's TokenAuth's job.
+		key, _ = splitBYOKKey(key)
 		key = strings.TrimPrefix(key, "sk-")
 		parts := strings.Split(key, "-")
 		key = parts[0]
@@ -273,62 +322,84 @@ func TokenAuthReadOnly() func(c *gin.Context) {
 	}
 }
 
-func TokenAuth() func(c *gin.Context) {
-	return func(c *gin.Context) {
-		// 先检测是否为ws
-		if c.Request.Header.Get("Sec-WebSocket-Protocol") != "" {
-			// Sec-WebSocket-Protocol: realtime, openai-insecure-api-key.sk-xxx, openai-beta.realtime-v1
-			// read sk from Sec-WebSocket-Protocol
-			key := c.Request.Header.Get("Sec-WebSocket-Protocol")
-			parts := strings.Split(key, ",")
-			for _, part := range parts {
-				part = strings.TrimSpace(part)
-				if strings.HasPrefix(part, "openai-insecure-api-key") {
-					key = strings.TrimPrefix(part, "openai-insecure-api-key.")
-					break
-				}
-			}
-			c.Request.Header.Set("Authorization", "Bearer "+key)
-		}
-		// 检查path包含/v1/messages 或 /v1/models
-		if strings.Contains(c.Request.URL.Path, "/v1/messages") || strings.Contains(c.Request.URL.Path, "/v1/models") {
-			anthropicKey := c.Request.Header.Get("x-api-key")
-			if anthropicKey != "" {
-				c.Request.Header.Set("Authorization", "Bearer "+anthropicKey)
-			}
-		}
-		// gemini api 从query中获取key
-		if strings.HasPrefix(c.Request.URL.Path, "/v1beta/models") ||
-			strings.HasPrefix(c.Request.URL.Path, "/v1beta/openai/models") ||
-			strings.HasPrefix(c.Request.URL.Path, "/v1/models/") {
-			skKey := c.Query("key")
-			if skKey != "" {
-				c.Request.Header.Set("Authorization", "Bearer "+skKey)
-			}
-			// 从x-goog-api-key header中获取key
-			xGoogKey := c.Request.Header.Get("x-goog-api-key")
-			if xGoogKey != "" {
-				c.Request.Header.Set("Authorization", "Bearer "+xGoogKey)
+// extractTokenAuthCarrier consolidates all carrier-to-Authorization rewrites
+// and the BYOK colon-split previously inlined at the top of TokenAuth. It is
+// the convergence point that guarantees every supported carrier
+// (Authorization Bearer/bearer, Sec-WebSocket-Protocol's
+// openai-insecure-api-key segment, x-api-key on Claude paths, x-goog-api-key
+// and ?key= on Gemini paths, and mj-api-secret) is normalized into the same
+// token-parts shape and that any BYOK upstream half is written into
+// ContextKeyBYOKUpstreamKey on the gin context.
+//
+// Returning early refactor with byte-identical observable behavior so the
+// existing TokenAuth wiring continues to work — only call site moved.
+func extractTokenAuthCarrier(c *gin.Context) (key string, parts []string) {
+	// 先检测是否为ws
+	if c.Request.Header.Get("Sec-WebSocket-Protocol") != "" {
+		// Sec-WebSocket-Protocol: realtime, openai-insecure-api-key.sk-xxx, openai-beta.realtime-v1
+		// read sk from Sec-WebSocket-Protocol
+		wsKey := c.Request.Header.Get("Sec-WebSocket-Protocol")
+		wsParts := strings.Split(wsKey, ",")
+		for _, part := range wsParts {
+			part = strings.TrimSpace(part)
+			if strings.HasPrefix(part, "openai-insecure-api-key") {
+				wsKey = strings.TrimPrefix(part, "openai-insecure-api-key.")
+				break
 			}
 		}
-		key := c.Request.Header.Get("Authorization")
-		parts := make([]string, 0)
+		c.Request.Header.Set("Authorization", "Bearer "+wsKey)
+	}
+	// 检查path包含/v1/messages 或 /v1/models
+	if strings.Contains(c.Request.URL.Path, "/v1/messages") || strings.Contains(c.Request.URL.Path, "/v1/models") {
+		anthropicKey := c.Request.Header.Get("x-api-key")
+		if anthropicKey != "" {
+			c.Request.Header.Set("Authorization", "Bearer "+anthropicKey)
+		}
+	}
+	// gemini api 从query中获取key
+	if strings.HasPrefix(c.Request.URL.Path, "/v1beta/models") ||
+		strings.HasPrefix(c.Request.URL.Path, "/v1beta/openai/models") ||
+		strings.HasPrefix(c.Request.URL.Path, "/v1/models/") {
+		skKey := c.Query("key")
+		if skKey != "" {
+			c.Request.Header.Set("Authorization", "Bearer "+skKey)
+		}
+		// 从x-goog-api-key header中获取key
+		xGoogKey := c.Request.Header.Get("x-goog-api-key")
+		if xGoogKey != "" {
+			c.Request.Header.Set("Authorization", "Bearer "+xGoogKey)
+		}
+	}
+	key = c.Request.Header.Get("Authorization")
+	parts = make([]string, 0)
+	var upstreamKey string
+	if strings.HasPrefix(key, "Bearer ") || strings.HasPrefix(key, "bearer ") {
+		key = strings.TrimSpace(key[7:])
+	}
+	if key == "" || key == "midjourney-proxy" {
+		key = c.Request.Header.Get("mj-api-secret")
 		if strings.HasPrefix(key, "Bearer ") || strings.HasPrefix(key, "bearer ") {
 			key = strings.TrimSpace(key[7:])
 		}
-		if key == "" || key == "midjourney-proxy" {
-			key = c.Request.Header.Get("mj-api-secret")
-			if strings.HasPrefix(key, "Bearer ") || strings.HasPrefix(key, "bearer ") {
-				key = strings.TrimSpace(key[7:])
-			}
-			key = strings.TrimPrefix(key, "sk-")
-			parts = strings.Split(key, "-")
-			key = parts[0]
-		} else {
-			key = strings.TrimPrefix(key, "sk-")
-			parts = strings.Split(key, "-")
-			key = parts[0]
-		}
+		// BYOK split: support `sk-<token>:<upstream-key>` carrier on mj-api-secret.
+		key, parts, upstreamKey = parseAuthCarrierValue(key)
+	} else {
+		// BYOK split: support `sk-<token>:<upstream-key>` carrier on every header
+		// source that lands in Authorization (Bearer/bearer original,
+		// Sec-WebSocket-Protocol openai-insecure-api-key segment, x-api-key for
+		// Claude paths, x-goog-api-key and ?key= for Gemini paths). The right
+		// half is preserved verbatim (including any further `:` characters).
+		key, parts, upstreamKey = parseAuthCarrierValue(key)
+	}
+	if upstreamKey != "" {
+		common.SetContextKey(c, constant.ContextKeyBYOKUpstreamKey, upstreamKey)
+	}
+	return key, parts
+}
+
+func TokenAuth() func(c *gin.Context) {
+	return func(c *gin.Context) {
+		key, parts := extractTokenAuthCarrier(c)
 		token, err := model.ValidateUserToken(key)
 		if token != nil {
 			id := c.GetInt("id")

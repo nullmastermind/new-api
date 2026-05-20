@@ -4266,6 +4266,13 @@
     "并确认自行承担部署": "confirm that I bear legal responsibility arising from deployment",
     "运营和收费行为产生的法律责任": "operation and charging behavior",
     "，": ", ",
-    "、": ", "
+    "、": ", ",
+    "已复制 $FORWARD_KEY": "Đã sao chép $FORWARD_KEY",
+    "复制 BYOK 占位符": "Sao chép giá trị BYOK",
+    "将 $FORWARD_KEY 粘贴到渠道密钥字段以启用 BYOK（自带密钥）转发。客户端调用时使用 sk-<令牌>:<上游密钥> 作为 API Key。": "Dán $FORWARD_KEY làm khóa kênh để bật chuyển tiếp BYOK (Bring Your Own Key). Sau đó, máy khách gửi sk-<token>:<khóa-thượng-nguồn> làm khóa API.",
+    "推荐用于简单密钥渠道（OpenAI、Anthropic、Gemini、Azure）。AWS、Vertex JSON、讯飞、火山引擎 TTS 等复合密钥渠道需在冒号后传入完整复合字符串。": "Phù hợp với các nhà cung cấp dùng khóa đơn (OpenAI, Anthropic, Gemini, Azure). Các nhà cung cấp dùng khóa phức hợp (AWS, Vertex JSON, Xunfei, Volcengine TTS) yêu cầu máy khách gửi toàn bộ chuỗi phức hợp sau dấu hai chấm.",
+    "上游测试密钥（BYOK）": "Khóa kiểm thử thượng nguồn (BYOK)",
+    "BYOK 渠道必填，仅用于本次测试，不会保存到数据库": "Bắt buộc với các kênh BYOK — dán khóa thượng nguồn thật chỉ cho lần kiểm thử này",
+    "当前渠道为 BYOK 转发模式，测试密钥仅本次使用，不会被持久化。": "Kênh này đang ở chế độ chuyển tiếp BYOK. Khóa kiểm thử chỉ dùng cho lần kiểm thử này và không được lưu lại."
   }
 }

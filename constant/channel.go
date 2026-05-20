@@ -1,5 +1,12 @@
 package constant
 
+// ChannelKeyForwardSentinel is the literal value stored in `channel.Key` to
+// flip the channel into Bring-Your-Own-Key (BYOK) forwarding mode. A channel
+// is considered BYOK-enabled when any newline-separated line of `channel.Key`
+// equals this sentinel (after trimming whitespace). See `model/channel.go`'s
+// `Channel.IsForwardKeyMode` for the detection contract.
+const ChannelKeyForwardSentinel = "$FORWARD_KEY"
+
 const (
 	ChannelTypeUnknown        = 0
 	ChannelTypeOpenAI         = 1

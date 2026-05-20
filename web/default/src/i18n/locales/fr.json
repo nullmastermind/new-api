@@ -4481,6 +4481,12 @@
     "Zero retention": "Aucune rétention",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "Copy BYOK sentinel": "Copier la valeur sentinelle BYOK",
+    "Paste $FORWARD_KEY as the channel key to enable BYOK (Bring Your Own Key) forwarding. Clients then send sk-<token>:<upstream-key> as the API key.": "Collez $FORWARD_KEY comme clé du canal pour activer le mode BYOK (Bring Your Own Key). Les clients envoient ensuite sk-<token>:<clé-amont> comme clé d'API.",
+    "Best with simple-key providers (OpenAI, Anthropic, Gemini, Azure). Composite-key providers (AWS, Vertex JSON, Xunfei, Volcengine TTS) require the client to send the full composite string after the colon.": "Idéal avec les fournisseurs à clé simple (OpenAI, Anthropic, Gemini, Azure). Les fournisseurs à clé composite (AWS, Vertex JSON, Xunfei, Volcengine TTS) exigent que le client envoie la chaîne composite complète après le deux-points.",
+    "Upstream test key (BYOK)": "Clé amont de test (BYOK)",
+    "Required for BYOK channels — paste a real upstream key for this test only": "Requis pour les canaux BYOK — collez une vraie clé amont uniquement pour ce test",
+    "This channel is in BYOK forwarding mode. The test key is used only for this test and is not persisted.": "Ce canal est en mode de transfert BYOK. La clé de test n'est utilisée que pour ce test et n'est pas conservée."
   }
 }

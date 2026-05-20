@@ -37,6 +37,10 @@ const (
 	ContextKeyChannelIsMultiKey        ContextKey = "channel_is_multi_key"
 	ContextKeyChannelMultiKeyIndex     ContextKey = "channel_multi_key_index"
 	ContextKeyChannelKey               ContextKey = "channel_key"
+	// ContextKeyBYOKUpstreamKey stores the client-supplied upstream key for BYOK channels.
+	// Populated by TokenAuth when the carrier value contains a `:` separator;
+	// consumed by the distributor when the selected channel is in forward-key mode.
+	ContextKeyBYOKUpstreamKey ContextKey = "byok_upstream_key"
 
 	ContextKeyAutoGroup           ContextKey = "auto_group"
 	ContextKeyAutoGroupIndex      ContextKey = "auto_group_index"

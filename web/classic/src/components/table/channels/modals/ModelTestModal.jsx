@@ -58,6 +58,23 @@ const ModelTestModal = ({
   t,
 }) => {
   const hasChannel = Boolean(currentTestChannel);
+  // BYOK detection mirrors backend `Channel.IsForwardKeyMode`: a channel is
+  // BYOK-enabled when any `\n`-split line of its key field, after trimming,
+  // equals the literal sentinel `$FORWARD_KEY`. Substring matches do NOT
+  // count.
+  const isBYOK = React.useMemo(() => {
+    const raw = currentTestChannel && typeof currentTestChannel.key === 'string'
+      ? currentTestChannel.key
+      : '';
+    if (!raw) return false;
+    return raw.split('\n').some((line) => line.trim() === '$FORWARD_KEY');
+  }, [currentTestChannel]);
+  const [byokTestKey, setByokTestKey] = React.useState('');
+  React.useEffect(() => {
+    if (!showModelTestModal) {
+      setByokTestKey('');
+    }
+  }, [showModelTestModal]);
   const streamToggleDisabled = [
     'embeddings',
     'image-generation',
@@ -225,6 +242,7 @@ const ModelTestModal = ({
                 record.model,
                 selectedEndpointType,
                 isStreamTest,
+                isBYOK ? byokTestKey : '',
               )
             }
             loading={isTesting}
@@ -282,7 +300,9 @@ const ModelTestModal = ({
               </Button>
             )}
             <Button
-              onClick={batchTestModels}
+              onClick={() =>
+                batchTestModels(isBYOK ? byokTestKey : '')
+              }
               loading={isBatchTesting}
               disabled={isBatchTesting}
             >
@@ -302,6 +322,27 @@ const ModelTestModal = ({
     >
       {hasChannel && (
         <div className='model-test-scroll'>
+          {isBYOK && (
+            <div className='flex flex-col gap-2 w-full mb-2'>
+              <Typography.Text strong>
+                {t('上游测试密钥（BYOK）')}
+              </Typography.Text>
+              <Input
+                mode='password'
+                value={byokTestKey}
+                onChange={setByokTestKey}
+                placeholder={t(
+                  'BYOK 渠道必填，仅用于本次测试，不会保存到数据库',
+                )}
+                showClear
+              />
+              <Typography.Text type='tertiary' size='small'>
+                {t(
+                  '当前渠道为 BYOK 转发模式，测试密钥仅本次使用，不会被持久化。',
+                )}
+              </Typography.Text>
+            </div>
+          )}
           {/* Endpoint toolbar */}
           <div className='flex flex-col sm:flex-row sm:items-center gap-2 w-full mb-2'>
             <div className='flex items-center gap-2 flex-1 min-w-0'>

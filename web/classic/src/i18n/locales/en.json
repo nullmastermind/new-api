@@ -3881,6 +3881,13 @@
     "并确认自行承担部署": "confirm that I bear legal responsibility arising from deployment",
     "运营和收费行为产生的法律责任": "operation and charging behavior",
     "，": ", ",
-    "、": ", "
+    "、": ", ",
+    "已复制 $FORWARD_KEY": "$FORWARD_KEY copied",
+    "复制 BYOK 占位符": "Copy BYOK sentinel",
+    "将 $FORWARD_KEY 粘贴到渠道密钥字段以启用 BYOK（自带密钥）转发。客户端调用时使用 sk-<令牌>:<上游密钥> 作为 API Key。": "Paste $FORWARD_KEY as the channel key to enable BYOK (Bring Your Own Key) forwarding. Clients then send sk-<token>:<upstream-key> as the API key.",
+    "推荐用于简单密钥渠道（OpenAI、Anthropic、Gemini、Azure）。AWS、Vertex JSON、讯飞、火山引擎 TTS 等复合密钥渠道需在冒号后传入完整复合字符串。": "Best with simple-key providers (OpenAI, Anthropic, Gemini, Azure). Composite-key providers (AWS, Vertex JSON, Xunfei, Volcengine TTS) require the client to send the full composite string after the colon.",
+    "上游测试密钥（BYOK）": "Upstream test key (BYOK)",
+    "BYOK 渠道必填，仅用于本次测试，不会保存到数据库": "Required for BYOK channels — paste a real upstream key for this test only",
+    "当前渠道为 BYOK 转发模式，测试密钥仅本次使用，不会被持久化。": "This channel is in BYOK forwarding mode. The test key is used only for this test and is not persisted."
   }
 }

@@ -196,6 +196,23 @@ func (channel *Channel) GetKeys() []string {
 	return keys
 }
 
+// IsForwardKeyMode reports whether this channel is in Bring-Your-Own-Key (BYOK)
+// forwarding mode. A channel is BYOK-enabled when any `\n`-separated line of
+// `channel.Key`, after trimming surrounding whitespace, exactly equals
+// constant.ChannelKeyForwardSentinel. Substring matches (e.g. `$FORWARD_KEY_x`)
+// do NOT count.
+func (channel *Channel) IsForwardKeyMode() bool {
+	if channel == nil || channel.Key == "" {
+		return false
+	}
+	for _, line := range strings.Split(channel.Key, "\n") {
+		if strings.TrimSpace(line) == constant.ChannelKeyForwardSentinel {
+			return true
+		}
+	}
+	return false
+}
+
 func (channel *Channel) GetNextEnabledKey() (string, int, *types.NewAPIError) {
 	// If not in multi-key mode, return the original key string directly.
 	if !channel.ChannelInfo.IsMultiKey {

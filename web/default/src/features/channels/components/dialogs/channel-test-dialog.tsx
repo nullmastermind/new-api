@@ -123,6 +123,7 @@ export function ChannelTestDialog({
   const [endpointType, setEndpointType] = useState('auto')
   const [isStreamTest, setIsStreamTest] = useState(false)
   const [searchTerm, setSearchTerm] = useState('')
+  const [byokTestKey, setByokTestKey] = useState('')
   const [testResults, setTestResults] = useState<Record<string, TestResult>>({})
   const [rowSelection, setRowSelection] = useState<RowSelectionState>({})
   const [testingModels, setTestingModels] = useState<Set<string>>(
@@ -138,6 +139,7 @@ export function ChannelTestDialog({
     setEndpointType('auto')
     setIsStreamTest(false)
     setSearchTerm('')
+    setByokTestKey('')
     setTestResults({})
     setRowSelection({})
     setTestingModels(() => new Set())
@@ -162,6 +164,19 @@ export function ChannelTestDialog({
 
   const modelsValue = currentRow?.models ?? ''
   const defaultTestModel = currentRow?.test_model?.trim()
+
+  // BYOK detection mirrors backend `Channel.IsForwardKeyMode`: a channel is
+  // BYOK-enabled when any `\n`-split line of its key field, after trimming,
+  // equals the literal sentinel `$FORWARD_KEY`. Substring matches do NOT
+  // count.
+  const isBYOK = useMemo(() => {
+    const rawKey =
+      typeof currentRow?.key === 'string' ? currentRow.key : ''
+    if (!rawKey) return false
+    return rawKey
+      .split('\n')
+      .some((line) => line.trim() === '$FORWARD_KEY')
+  }, [currentRow?.key])
 
   const models = useMemo(() => {
     if (!modelsValue) return []
@@ -219,6 +234,7 @@ export function ChannelTestDialog({
             testModel: model,
             endpointType: endpointType === 'auto' ? undefined : endpointType,
             stream: isStreamTest || undefined,
+            byokTestKey: isBYOK && byokTestKey ? byokTestKey : undefined,
           },
           (success, responseTime, error, errorCode) => {
             updateTestResult(model, {
@@ -242,6 +258,8 @@ export function ChannelTestDialog({
       currentRow,
       endpointType,
       isStreamTest,
+      isBYOK,
+      byokTestKey,
       markModelTesting,
       t,
       updateTestResult,
@@ -506,6 +524,29 @@ export function ChannelTestDialog({
               </p>
             </div>
           </div>
+
+          {isBYOK && (
+            <div className='grid gap-2'>
+              <Label htmlFor='byok-test-key'>
+                {t('Upstream test key (BYOK)')}
+              </Label>
+              <Input
+                id='byok-test-key'
+                type='password'
+                placeholder={t(
+                  'Required for BYOK channels — paste a real upstream key for this test only'
+                )}
+                value={byokTestKey}
+                onChange={(e) => setByokTestKey(e.target.value)}
+                autoComplete='off'
+              />
+              <p className='text-muted-foreground text-xs'>
+                {t(
+                  'This channel is in BYOK forwarding mode. The test key is used only for this test and is not persisted.'
+                )}
+              </p>
+            </div>
+          )}
 
           <div className='space-y-3 max-sm:has-[div[role="toolbar"]]:pb-16'>
             <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>

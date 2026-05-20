@@ -1904,6 +1904,37 @@ export function ChannelMutateDrawer({
                             {...field}
                           />
                         </FormControl>
+                        <div className='border-info/40 bg-info/5 mt-2 rounded-md border p-3 text-xs'>
+                          <div className='flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between'>
+                            <div className='flex items-center gap-2'>
+                              <code className='bg-background rounded border px-1.5 py-0.5 font-mono text-xs'>
+                                $FORWARD_KEY
+                              </code>
+                              <Button
+                                type='button'
+                                variant='ghost'
+                                size='sm'
+                                onClick={async () => {
+                                  await copyToClipboard('$FORWARD_KEY')
+                                }}
+                                aria-label={t('Copy BYOK sentinel')}
+                              >
+                                <Copy className='mr-1 h-3 w-3' />
+                                {t('Copy BYOK sentinel')}
+                              </Button>
+                            </div>
+                          </div>
+                          <p className='text-muted-foreground mt-2'>
+                            {t(
+                              'Paste $FORWARD_KEY as the channel key to enable BYOK (Bring Your Own Key) forwarding. Clients then send sk-<token>:<upstream-key> as the API key.'
+                            )}
+                          </p>
+                          <p className='text-muted-foreground mt-1'>
+                            {t(
+                              'Best with simple-key providers (OpenAI, Anthropic, Gemini, Azure). Composite-key providers (AWS, Vertex JSON, Xunfei, Volcengine TTS) require the client to send the full composite string after the colon.'
+                            )}
+                          </p>
+                        </div>
                         <FormDescription>
                           <div className='flex flex-col gap-2'>
                             <span>

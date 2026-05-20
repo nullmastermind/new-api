@@ -156,7 +156,10 @@ func Distribute() func(c *gin.Context) {
 			}
 		}
 		common.SetContextKey(c, constant.ContextKeyRequestStartTime, time.Now())
-		SetupContextForSelectedChannel(c, channel, modelRequest.Model)
+		if setupErr := SetupContextForSelectedChannel(c, channel, modelRequest.Model); setupErr != nil {
+			abortWithOpenAiMessage(c, setupErr.StatusCode, setupErr.Error(), setupErr.GetErrorCode())
+			return
+		}
 		c.Next()
 		if channel != nil && c.Writer != nil && c.Writer.Status() < http.StatusBadRequest {
 			service.RecordChannelAffinity(c, channel.Id)
@@ -370,6 +373,24 @@ func SetupContextForSelectedChannel(c *gin.Context, channel *model.Channel, mode
 	key, index, newAPIError := channel.GetNextEnabledKey()
 	if newAPIError != nil {
 		return newAPIError
+	}
+	// BYOK forward-key mode: when the selected channel's stored Key signals
+	// Bring-Your-Own-Key forwarding, swap the DB-side key for the client-supplied
+	// upstream key (populated by TokenAuth into ContextKeyBYOKUpstreamKey) before
+	// it lands in ContextKeyChannelKey. If the client did not supply an upstream
+	// key, abort with HTTP 401 and a documented message — skip retry so the
+	// caller does not burn through other channels for a client-side mistake.
+	if channel.IsForwardKeyMode() {
+		upstreamKey := common.GetContextKeyString(c, constant.ContextKeyBYOKUpstreamKey)
+		if upstreamKey == "" {
+			return types.NewError(
+				errors.New("this channel requires BYOK format: sk-<token>:<upstream-key>"),
+				types.ErrorCodeAccessDenied,
+				types.ErrOptionWithStatusCode(http.StatusUnauthorized),
+				types.ErrOptionWithSkipRetry(),
+			)
+		}
+		key = upstreamKey
 	}
 	if channel.ChannelInfo.IsMultiKey {
 		common.SetContextKey(c, constant.ContextKeyChannelIsMultiKey, true)

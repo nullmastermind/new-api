@@ -4481,6 +4481,12 @@
     "Zero retention": "Không lưu dữ liệu",
     "Zhipu": "Zhipu",
     "Zhipu V4": "Zhipu V4",
-    "Zoom": "Zoom"
+    "Zoom": "Zoom",
+    "Copy BYOK sentinel": "Sao chép giá trị BYOK",
+    "Paste $FORWARD_KEY as the channel key to enable BYOK (Bring Your Own Key) forwarding. Clients then send sk-<token>:<upstream-key> as the API key.": "Dán $FORWARD_KEY làm khóa kênh để bật chuyển tiếp BYOK (Bring Your Own Key). Sau đó, máy khách gửi sk-<token>:<khóa-thượng-nguồn> làm khóa API.",
+    "Best with simple-key providers (OpenAI, Anthropic, Gemini, Azure). Composite-key providers (AWS, Vertex JSON, Xunfei, Volcengine TTS) require the client to send the full composite string after the colon.": "Phù hợp nhất với các nhà cung cấp dùng khóa đơn (OpenAI, Anthropic, Gemini, Azure). Các nhà cung cấp dùng khóa phức hợp (AWS, Vertex JSON, Xunfei, Volcengine TTS) yêu cầu máy khách gửi toàn bộ chuỗi phức hợp sau dấu hai chấm.",
+    "Upstream test key (BYOK)": "Khóa kiểm thử thượng nguồn (BYOK)",
+    "Required for BYOK channels — paste a real upstream key for this test only": "Bắt buộc với các kênh BYOK — dán khóa thượng nguồn thật chỉ cho lần kiểm thử này",
+    "This channel is in BYOK forwarding mode. The test key is used only for this test and is not persisted.": "Kênh này đang ở chế độ chuyển tiếp BYOK. Khóa kiểm thử chỉ dùng cho lần kiểm thử này và không được lưu lại."
   }
 }

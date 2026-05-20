@@ -43,6 +43,29 @@ type testResult struct {
 	newAPIError *types.NewAPIError
 }
 
+// checkBYOKTestKey gates channel-test execution for BYOK (forward-key) channels.
+//
+// Behavior:
+//   - BYOK channel + non-empty byokTestKey  → returns the trimmed override key,
+//     nil error. The caller substitutes info.ApiKey with it.
+//   - BYOK channel + empty/whitespace byokTestKey → returns "", non-nil error
+//     carrying ErrOptionWithSkipRetry so the auto-test loop's
+//     service.ShouldDisableChannel path returns false and the channel is NOT
+//     auto-banned by a missing-key failure.
+//   - Non-BYOK channel (regardless of byokTestKey) → returns "", nil error.
+//     Caller proceeds with the stored channel key.
+func checkBYOKTestKey(channel *model.Channel, byokTestKey string) (string, *types.NewAPIError) {
+	if channel == nil || !channel.IsForwardKeyMode() {
+		return "", nil
+	}
+	trimmed := strings.TrimSpace(byokTestKey)
+	if trimmed == "" {
+		localErr := fmt.Errorf("BYOK channel requires test upstream key")
+		return "", types.NewError(localErr, types.ErrorCodeAccessDenied, types.ErrOptionWithSkipRetry())
+	}
+	return trimmed, nil
+}
+
 func normalizeChannelTestEndpoint(channel *model.Channel, modelName, endpointType string) string {
 	normalized := strings.TrimSpace(endpointType)
 	if normalized != "" {
@@ -57,7 +80,7 @@ func normalizeChannelTestEndpoint(channel *model.Channel, modelName, endpointTyp
 	return normalized
 }
 
-func testChannel(channel *model.Channel, testModel string, endpointType string, isStream bool) testResult {
+func testChannel(channel *model.Channel, testModel string, endpointType string, isStream bool, byokTestKey string) testResult {
 	tik := time.Now()
 	var unsupportedTestChannelTypes = []int{
 		constant.ChannelTypeMidjourney,
@@ -233,6 +256,21 @@ func testChannel(channel *model.Channel, testModel string, endpointType string, 
 
 	info.IsChannelTest = true
 	info.InitChannelMeta(c)
+
+	// BYOK channel test: when the selected channel is in forward-key mode,
+	// require an admin-supplied upstream key for the test. We override the
+	// info.ApiKey before any upstream call. If no key is provided, short
+	// -circuit with a clear local error — do NOT contact upstream (which
+	// would always fail and silently auto-ban a working BYOK channel).
+	if overrideKey, byokErr := checkBYOKTestKey(channel, byokTestKey); byokErr != nil {
+		return testResult{
+			context:     c,
+			localErr:    byokErr.Err,
+			newAPIError: byokErr,
+		}
+	} else if overrideKey != "" {
+		info.ApiKey = overrideKey
+	}
 
 	err = attachTestBillingRequestInput(info, request)
 	if err != nil {
@@ -834,8 +872,12 @@ func TestChannel(c *gin.Context) {
 	testModel := c.Query("model")
 	endpointType := c.Query("endpoint_type")
 	isStream, _ := strconv.ParseBool(c.Query("stream"))
+	// Read the BYOK test key from a header (not a query parameter) so the
+	// upstream secret does not leak into URL access logs, reverse-proxy
+	// logs, or browser history. The value is consumed in-memory only.
+	byokTestKey := c.GetHeader("X-BYOK-Test-Key")
 	tik := time.Now()
-	result := testChannel(channel, testModel, endpointType, isStream)
+	result := testChannel(channel, testModel, endpointType, isStream, byokTestKey)
 	if result.localErr != nil {
 		resp := gin.H{
 			"success": false,
@@ -902,7 +944,7 @@ func testAllChannels(notify bool) error {
 			}
 			isChannelEnabled := channel.Status == common.ChannelStatusEnabled
 			tik := time.Now()
-			result := testChannel(channel, "", "", shouldUseStreamForAutomaticChannelTest(channel))
+			result := testChannel(channel, "", "", shouldUseStreamForAutomaticChannelTest(channel), "")
 			tok := time.Now()
 			milliseconds := tok.Sub(tik).Milliseconds()
 
