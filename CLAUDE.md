@@ -149,6 +149,13 @@ Tokens use format `sk-<key>[-<channel_id>][-<group>]`:
 - Ping keep-alive for long-running streams
 - Custom `CustomEvent` renderer for SSE format
 
+### Responses-API ↔ Anthropic Translation Pivot
+- When a `/v1/responses` request is routed to an Anthropic-typed channel, the gateway performs a two-step pivot through a Chat-Completions intermediate: `Responses → ChatCompletions` (in `service/openaicompat/responses_to_chat.go`), then `ChatCompletions → Anthropic` (via the existing `relay/channel/claude/relay-claude.go::RequestOpenAI2ClaudeMessage`).
+- On the response side, the existing Claude stream/non-stream handler emits Chat-Completions chunks/responses, which are then re-translated to Responses-API events (in `service/openaicompat/chat_stream_to_responses.go` and `chat_to_responses.go`).
+- Orchestration lives in `relay/responses_via_chat_completions.go`, mirroring `relay/chat_completions_via_responses.go` in the opposite direction.
+- Tool-call IDs are sanitized at the boundary (`service/openaicompat/tool_call_ids.go`) to satisfy Anthropic's `^[a-zA-Z0-9_-]{1,64}$` constraint: pass-through → strip-and-keep → UUID fallback.
+- Feature-gated via `RESPONSES_TO_ANTHROPIC_ENABLED` (default true). Operators can disable to restore the legacy "not implemented" behavior.
+
 ### Database Support
 - SQLite (default), MySQL (≥5.7.8), PostgreSQL (≥9.6)
 - Separate log database supported via `LOG_SQL_DSN`
@@ -174,6 +181,7 @@ Tokens use format `sk-<key>[-<channel_id>][-<group>]`:
 | `MEMORY_CACHE_ENABLED` | Enable in-memory caching | false |
 | `TIKTOKEN_CACHE_DIR` | Directory for tiktoken cache | - |
 | `NODE_TYPE` | master/slave node type | master |
+| `RESPONSES_TO_ANTHROPIC_ENABLED` | Enable Responses-API to Anthropic translation pivot for `/v1/responses` requests routed to Anthropic-typed channels | true |
 
 ## API Types (Provider Constants)
 
