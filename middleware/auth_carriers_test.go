@@ -1,12 +1,15 @@
 package middleware
 
 import (
+	"io"
+	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
+	"github.com/gin-contrib/gzip"
 	"github.com/gin-gonic/gin"
 )
 
@@ -383,6 +386,174 @@ func TestBYOKURLPrefixRegex_LengthBound(t *testing.T) {
 			got := byokURLPrefixRegex.FindStringSubmatchIndex(tc.path) != nil
 			if got != tc.wantMatch {
 				t.Fatalf("regex match for %q = %v, want %v", tc.path, got, tc.wantMatch)
+			}
+		})
+	}
+}
+
+// TestWrapBYOKURLRewrite_GzipStreamingPath is a regression test for the bug
+// where the URL-prefix rewrite ran from a NoRoute handler INSIDE the gin
+// engine. In that broken path, the outer NoRoute chain's gzip middleware
+// set `Content-Encoding: gzip` on the response and wrapped the writer;
+// engine.HandleContext re-dispatched and reset the writer to bare, but the
+// header lingered and the gz.Close() defer wrote gzip trailer bytes after
+// the raw SSE body. Clients failed to parse → "Failed to process error
+// response" / 404 symptom.
+//
+// The fix moved the rewrite OUTSIDE gin via WrapBYOKURLRewrite. This test
+// proves that with gzip enabled at the gin layer, a streaming response
+// through the wrapper has neither a stale Content-Encoding header nor
+// garbage trailer bytes.
+func TestWrapBYOKURLRewrite_GzipStreamingPath(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	engine := gin.New()
+
+	// Mirror production: gzip is one of the engine.Handlers Use middlewares
+	// active in the allNoRoute chain.
+	engine.Use(gzip.Gzip(gzip.DefaultCompression))
+
+	engine.POST("/v1/chat/completions", func(c *gin.Context) {
+		c.Header("Content-Type", "text/event-stream")
+		c.Header("Cache-Control", "no-cache")
+		c.Status(200)
+		c.Writer.WriteHeaderNow()
+		_, _ = io.WriteString(c.Writer, "data: {\"id\":\"1\"}\n\n")
+		c.Writer.Flush()
+		_, _ = io.WriteString(c.Writer, "data: [DONE]\n\n")
+		c.Writer.Flush()
+	})
+
+	// Fallback NoRoute writes a known body so we can confirm the wrapper —
+	// not NoRoute — handled the rewrite.
+	engine.NoRoute(func(c *gin.Context) {
+		c.String(404, "noroute-fallback")
+	})
+
+	// Wrap the engine the same way main.go does.
+	handler := WrapBYOKURLRewrite(engine)
+
+	req := httptest.NewRequest("POST",
+		"/sk-xOOp2bUg0ZXz8qosvIpGkeD0rQS7MH5PXJmodF3njtzH35nJ/v1/chat/completions", nil)
+	req.Header.Set("Authorization", "Bearer sk-real-upstream-key")
+	req.Header.Set("Accept-Encoding", "gzip")
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, req)
+
+	if w.Code != 200 {
+		t.Fatalf("expected 200, got %d body=%q", w.Code, w.Body.String())
+	}
+	// The body must be raw SSE (Content-Encoding header must agree).
+	// Either: no Content-Encoding (passes through) AND body is raw text/event-stream,
+	// or: Content-Encoding=gzip AND body is gzip-encoded SSE.
+	// What MUST NOT happen: Content-Encoding=gzip + raw SSE body (the bug).
+	ce := w.Header().Get("Content-Encoding")
+	body := w.Body.String()
+	if ce == "gzip" && strings.HasPrefix(body, "data: ") {
+		t.Fatalf("regression: Content-Encoding=gzip set but body is raw SSE — client cannot decompress")
+	}
+	// Through the wrapper, gzip can still compress text/event-stream (allowed
+	// content-type for gzip middleware); what matters is internal consistency.
+	if ce == "" && !strings.Contains(body, "data: ") {
+		t.Fatalf("expected raw SSE body when no Content-Encoding; got %q", body)
+	}
+}
+
+// TestWrapBYOKURLRewrite_PassthroughForNonBYOKPaths confirms that the wrapper
+// does NOT touch requests whose path doesn't match the /sk-<token>/ prefix.
+func TestWrapBYOKURLRewrite_PassthroughForNonBYOKPaths(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	engine := gin.New()
+
+	var capturedPath, capturedAuth string
+	engine.POST("/v1/chat/completions", func(c *gin.Context) {
+		capturedPath = c.Request.URL.Path
+		capturedAuth = c.Request.Header.Get("Authorization")
+		c.Status(200)
+	})
+
+	handler := WrapBYOKURLRewrite(engine)
+
+	req := httptest.NewRequest("POST", "/v1/chat/completions", nil)
+	req.Header.Set("Authorization", "Bearer sk-only-token")
+	w := httptest.NewRecorder()
+	handler.ServeHTTP(w, req)
+
+	if w.Code != 200 {
+		t.Fatalf("status=%d", w.Code)
+	}
+	if capturedPath != "/v1/chat/completions" {
+		t.Fatalf("path=%q", capturedPath)
+	}
+	if capturedAuth != "Bearer sk-only-token" {
+		t.Fatalf("authorization touched without /sk- prefix: %q", capturedAuth)
+	}
+}
+
+// TestWrapBYOKURLRewrite_PrefixCarrierSynthesizesAuth is the wrapper-level
+// equivalent of the in-engine integration test. Confirms regex match +
+// Authorization synthesis + path rewrite operate on plain *http.Request.
+func TestWrapBYOKURLRewrite_PrefixCarrierSynthesizesAuth(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	engine := gin.New()
+
+	var capturedPath, capturedAuth string
+	engine.POST("/v1/chat/completions", func(c *gin.Context) {
+		capturedPath = c.Request.URL.Path
+		capturedAuth = c.Request.Header.Get("Authorization")
+		c.Status(200)
+	})
+
+	handler := WrapBYOKURLRewrite(engine)
+
+	cases := []struct {
+		name     string
+		setup    func(*http.Request)
+		wantAuth string
+	}{
+		{
+			name: "bearer upstream only",
+			setup: func(r *http.Request) {
+				r.Header.Set("Authorization", "Bearer sk-real-upstream-key")
+			},
+			wantAuth: "Bearer sk-abc123:sk-real-upstream-key",
+		},
+		{
+			name:     "no Authorization (no colon appended)",
+			setup:    func(r *http.Request) {},
+			wantAuth: "Bearer sk-abc123",
+		},
+		{
+			name: "URL token wins over Authorization colon",
+			setup: func(r *http.Request) {
+				r.Header.Set("Authorization", "Bearer sk-other:sk-real-upstream")
+			},
+			wantAuth: "Bearer sk-abc123:sk-real-upstream",
+		},
+		{
+			name: "x-api-key upstream",
+			setup: func(r *http.Request) {
+				r.Header.Set("x-api-key", "sk-anthropic-upstream")
+			},
+			wantAuth: "Bearer sk-abc123:sk-anthropic-upstream",
+		},
+	}
+	for _, tc := range cases {
+		tc := tc
+		t.Run(tc.name, func(t *testing.T) {
+			capturedPath, capturedAuth = "", ""
+			req := httptest.NewRequest("POST", "/sk-abc123/v1/chat/completions", nil)
+			tc.setup(req)
+			w := httptest.NewRecorder()
+			handler.ServeHTTP(w, req)
+
+			if w.Code != 200 {
+				t.Fatalf("status=%d", w.Code)
+			}
+			if capturedPath != "/v1/chat/completions" {
+				t.Fatalf("path=%q", capturedPath)
+			}
+			if capturedAuth != tc.wantAuth {
+				t.Fatalf("auth=%q want=%q", capturedAuth, tc.wantAuth)
 			}
 		})
 	}

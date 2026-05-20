@@ -204,7 +204,12 @@ func main() {
 	// Log startup success message
 	common.LogStartupSuccess(startTime, port)
 
-	err = server.Run(":" + port)
+	// Wrap the gin engine with the BYOK URL-prefix rewriter so `/sk-<token>/...`
+	// requests are rewritten BEFORE gin sees them (avoids the gzip+streaming
+	// header/body mismatch that occurs when the rewrite is done from a NoRoute
+	// handler — see middleware/byok.go for details).
+	handler := middleware.WrapBYOKURLRewrite(server)
+	err = http.ListenAndServe(":"+port, handler)
 	if err != nil {
 		common.FatalLog("failed to start HTTP server: " + err.Error())
 	}

@@ -31,11 +31,6 @@ func SetWebRouter(router *gin.Engine, assets ThemeAssets) {
 	router.Use(middleware.Cache())
 	router.Use(static.Serve("/", themeFS))
 	router.NoRoute(func(c *gin.Context) {
-		// BYOK URL-prefix carrier: `/sk-<token>/...` rewrites and re-dispatches
-		// before falling back to web/SPA/404 handling.
-		if middleware.HandleBYOKURLRewrite(router, c) {
-			return
-		}
 		c.Set(middleware.RouteTagKey, "web")
 		if strings.HasPrefix(c.Request.RequestURI, "/v1") || strings.HasPrefix(c.Request.RequestURI, "/api") || strings.HasPrefix(c.Request.RequestURI, "/assets") {
 			controller.RelayNotFound(c)

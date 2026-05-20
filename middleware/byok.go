@@ -1,11 +1,100 @@
 package middleware
 
 import (
+	"net/http"
 	"regexp"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
+
+// WrapBYOKURLRewrite wraps an http.Handler so that requests whose path starts
+// with `/sk-<token>/` are rewritten BEFORE the inner handler sees them. The
+// `sk-<token>` segment becomes the new-api token (synthesized into the
+// Authorization header), and the existing Authorization / x-api-key /
+// x-goog-api-key / `?key=` carriers contribute the upstream key per the
+// precedence chain documented on HandleBYOKURLRewrite.
+//
+// This wrapper is the PRIMARY entry point for the URL-prefix BYOK carrier.
+// It runs before any gin middleware (including response gzip), avoiding the
+// streaming/gzip interaction bug where the NoRoute path leaves a dangling
+// Content-Encoding: gzip header on raw SSE bodies.
+func WrapBYOKURLRewrite(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		rewriteBYOKURLIfMatch(r)
+		next.ServeHTTP(w, r)
+	})
+}
+
+// rewriteBYOKURLIfMatch performs the /sk-<token>/ → / rewrite on the given
+// request in place. If the path does not match the prefix, the request is
+// left untouched.
+func rewriteBYOKURLIfMatch(r *http.Request) {
+	if r == nil || r.URL == nil {
+		return
+	}
+	match := byokURLPrefixRegex.FindStringSubmatchIndex(r.URL.Path)
+	if match == nil {
+		return
+	}
+	tokenStart, tokenEnd := match[2], match[3]
+	token := r.URL.Path[tokenStart:tokenEnd]
+	rewrittenPath := r.URL.Path[tokenEnd:]
+	if !strings.HasPrefix(rewrittenPath, "/") {
+		rewrittenPath = "/" + rewrittenPath
+	}
+
+	upstream := resolveBYOKUpstreamFromHTTPRequest(r)
+
+	var authValue string
+	if upstream != "" {
+		authValue = "Bearer " + token + ":" + upstream
+	} else {
+		authValue = "Bearer " + token
+	}
+	r.Header.Set("Authorization", authValue)
+	r.Header.Del("x-api-key")
+	r.Header.Del("x-goog-api-key")
+
+	r.URL.Path = rewrittenPath
+	r.URL.RawPath = ""
+	if r.URL.RawQuery != "" {
+		r.RequestURI = rewrittenPath + "?" + r.URL.RawQuery
+	} else {
+		r.RequestURI = rewrittenPath
+	}
+}
+
+// resolveBYOKUpstreamFromHTTPRequest mirrors resolveBYOKUpstreamFromHeaders
+// but operates on a plain *http.Request (no gin.Context required). The
+// `?key=` query parameter is consumed when used (removed from the URL).
+func resolveBYOKUpstreamFromHTTPRequest(r *http.Request) string {
+	if auth := r.Header.Get("Authorization"); auth != "" {
+		raw := auth
+		if strings.HasPrefix(raw, "Bearer ") || strings.HasPrefix(raw, "bearer ") {
+			raw = strings.TrimSpace(raw[7:])
+		}
+		if idx := strings.IndexByte(raw, ':'); idx >= 0 {
+			return raw[idx+1:]
+		}
+		if raw != "" {
+			return raw
+		}
+	}
+	if v := strings.TrimSpace(r.Header.Get("x-api-key")); v != "" {
+		return v
+	}
+	if v := strings.TrimSpace(r.Header.Get("x-goog-api-key")); v != "" {
+		return v
+	}
+	q := r.URL.Query()
+	if v := q.Get("key"); v != "" {
+		q.Del("key")
+		r.URL.RawQuery = q.Encode()
+		return v
+	}
+	return ""
+}
 
 // byokURLPrefixRegex matches a leading `/sk-<token>/` segment on a request
 // path. The trailing `/` is REQUIRED — bare `/sk-...` paths (no further
