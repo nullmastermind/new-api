@@ -39,3 +39,4 @@ auggie_shell_conversation.txt
 .test
 token_estimator_test.go
 skills-lock.json
+.playwright-mcp
